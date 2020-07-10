@@ -1,7 +1,11 @@
 package com.romanenko.uservice.handler;
 
+import com.romanenko.io.ResponseSupplier;
 import com.romanenko.routing.ApiBuilder;
 import com.romanenko.routing.Routable;
+import com.romanenko.security.IdentityProvider;
+import com.romanenko.uservice.UserDao;
+import com.romanenko.uservice.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -12,6 +16,10 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class UserHandler implements Routable {
 
+    private final ResponseSupplier responseSupplier;
+    private final IdentityProvider identityProvider;
+    private final UserDao userDao;
+
     @Override
     public void declareRoute(ApiBuilder builder) {
         builder.get("/users", this::getAll)
@@ -20,8 +28,19 @@ public class UserHandler implements Routable {
                 .delete("/user", this::deleteUser);
     }
 
+    private Mono<ServerResponse> saveUser(ServerRequest request) {
+        return identityProvider.getIdentity(request)
+                .flatMap(e -> request.bodyToMono(User.class).doOnSuccess(u -> u.setId(e.getId())))
+                .flatMap(userDao::saveUser)
+                .flatMap(responseSupplier::ok)
+                .onErrorResume(responseSupplier::badRequest);
+    }
+
     private Mono<ServerResponse> deleteUser(ServerRequest request) {
-        return Mono.empty();
+        return identityProvider.getIdentity(request)
+                .flatMap(userDao::deleteById)
+                .flatMap(e -> responseSupplier.ok())
+                .onErrorResume(responseSupplier::badRequest);
     }
 
     private Mono<ServerResponse> getUser(ServerRequest request) {
@@ -29,10 +48,6 @@ public class UserHandler implements Routable {
     }
 
     public Mono<ServerResponse> getAll(ServerRequest request) {
-        return Mono.empty();
-    }
-
-    private Mono<ServerResponse> saveUser(ServerRequest request) {
         return Mono.empty();
     }
 }
