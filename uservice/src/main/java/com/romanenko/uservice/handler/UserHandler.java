@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -22,7 +23,7 @@ public class UserHandler implements Routable {
 
     @Override
     public void declareRoute(ApiBuilder builder) {
-        builder.get("/users", this::getAll)
+        builder.get("/users/nickname/{nickStart}", this::getAll)
                 .post("/user", this::saveUser)
                 .get("/user/{id}", this::getUser)
                 .delete("/user", this::deleteUser);
@@ -44,10 +45,12 @@ public class UserHandler implements Routable {
     }
 
     private Mono<ServerResponse> getUser(ServerRequest request) {
-        return Mono.empty();
+        Mono<User> user = userDao.getUserById(request.pathVariable("id"));
+        return responseSupplier.ok(user);
     }
 
     public Mono<ServerResponse> getAll(ServerRequest request) {
-        return Mono.empty();
+        Flux<User> users = userDao.getAllByNickBeginning(request.pathVariable("nickStart"));
+        return responseSupplier.ok(users);
     }
 }
