@@ -14,4 +14,8 @@ public interface ResponseSupplier {
     Mono<ServerResponse> ok(Flux<?> flux);
 
     Mono<ServerResponse> badRequest(Throwable e);
+
+    Mono<ServerResponse> badRequest(String message);
+
+    Mono<ServerResponse> noContent();
 }
