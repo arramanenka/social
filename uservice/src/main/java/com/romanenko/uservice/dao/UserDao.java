@@ -1,4 +1,4 @@
-package com.romanenko.uservice;
+package com.romanenko.uservice.dao;
 
 import com.romanenko.security.Identity;
 import com.romanenko.uservice.model.User;

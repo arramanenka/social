@@ -4,7 +4,7 @@ import com.romanenko.io.ResponseSupplier;
 import com.romanenko.routing.ApiBuilder;
 import com.romanenko.routing.Routable;
 import com.romanenko.security.IdentityProvider;
-import com.romanenko.uservice.UserDao;
+import com.romanenko.uservice.dao.UserDao;
 import com.romanenko.uservice.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
