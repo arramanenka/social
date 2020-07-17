@@ -34,14 +34,14 @@ public class UserHandler implements Routable {
                 .flatMap(e -> request.bodyToMono(User.class).doOnSuccess(u -> u.setId(e.getId())))
                 .flatMap(userDao::saveUser)
                 .flatMap(responseSupplier::ok)
-                .onErrorResume(responseSupplier::badRequest);
+                .onErrorResume(responseSupplier::error);
     }
 
     private Mono<ServerResponse> deleteUser(ServerRequest request) {
         return identityProvider.getIdentity(request)
                 .flatMap(userDao::deleteById)
                 .flatMap(e -> responseSupplier.ok())
-                .onErrorResume(responseSupplier::badRequest);
+                .onErrorResume(responseSupplier::error);
     }
 
     private Mono<ServerResponse> getUser(ServerRequest request) {
