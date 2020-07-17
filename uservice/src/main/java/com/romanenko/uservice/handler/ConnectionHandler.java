@@ -34,14 +34,14 @@ public class ConnectionHandler implements Routable {
 
     private Mono<ServerResponse> getAllFollowers(ServerRequest request) {
         String id = request.pathVariable("id");
-        Flux<Object> users = identityProvider.getIdentity(request)
+        Flux<String> users = identityProvider.getIdentity(request)
                 .flatMapMany(identity -> connectionDao.getFollowersOfUser(identity, id));
         return responseSupplier.ok(users);
     }
 
     private Mono<ServerResponse> getALlFollowing(ServerRequest request) {
         String id = request.pathVariable("id");
-        Flux<Object> users = identityProvider.getIdentity(request)
+        Flux<String> users = identityProvider.getIdentity(request)
                 .flatMapMany(identity -> connectionDao.getFollowedByUser(identity, id));
         return responseSupplier.ok(users);
     }
@@ -52,7 +52,8 @@ public class ConnectionHandler implements Routable {
                 .flatMap(id -> connectionDao.addFollower(id, followingId))
                 .filter(e -> e)
                 .flatMap(e -> responseSupplier.noContent())
-                .switchIfEmpty(responseSupplier.badRequest("Could not add follower."));
+                .switchIfEmpty(responseSupplier.badRequest("Could not add follower."))
+                .onErrorResume(responseSupplier::error);
     }
 
     private Mono<ServerResponse> removeFollower(ServerRequest request) {
@@ -61,11 +62,12 @@ public class ConnectionHandler implements Routable {
                 .flatMap(id -> connectionDao.removeFollower(id, followingId))
                 .filter(e -> e)
                 .flatMap(e -> responseSupplier.noContent())
-                .switchIfEmpty(responseSupplier.badRequest("Could not remove follower."));
+                .switchIfEmpty(responseSupplier.badRequest("Could not remove follower."))
+                .onErrorResume(responseSupplier::error);
     }
 
     private Mono<ServerResponse> getAllBlacklisted(ServerRequest request) {
-        Flux<Object> users = identityProvider.getIdentity(request)
+        Flux<String> users = identityProvider.getIdentity(request)
                 .flatMapMany(connectionDao::getBlacklist);
         return responseSupplier.ok(users);
     }
@@ -76,7 +78,8 @@ public class ConnectionHandler implements Routable {
                 .flatMap(id -> connectionDao.blacklist(id, blacklistedUser))
                 .filter(e -> e)
                 .flatMap(e -> responseSupplier.noContent())
-                .switchIfEmpty(responseSupplier.badRequest("Could not put user into blacklist."));
+                .switchIfEmpty(responseSupplier.badRequest("Could not put user into blacklist."))
+                .onErrorResume(responseSupplier::error);
     }
 
     private Mono<ServerResponse> removeFromBlacklist(ServerRequest request) {
@@ -85,6 +88,7 @@ public class ConnectionHandler implements Routable {
                 .flatMap(id -> connectionDao.removeFromBlacklist(id, blacklistedUser))
                 .filter(e -> e)
                 .flatMap(e -> responseSupplier.noContent())
-                .switchIfEmpty(responseSupplier.badRequest("Could not remove user from blacklist."));
+                .switchIfEmpty(responseSupplier.badRequest("Could not remove user from blacklist."))
+                .onErrorResume(responseSupplier::error);
     }
 }

@@ -18,4 +18,6 @@ public interface ResponseSupplier {
     Mono<ServerResponse> badRequest(String message);
 
     Mono<ServerResponse> noContent();
+
+    Mono<ServerResponse> error(Throwable e);
 }
