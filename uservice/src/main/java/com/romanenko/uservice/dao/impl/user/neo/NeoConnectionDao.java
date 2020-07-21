@@ -18,12 +18,22 @@ public class NeoConnectionDao implements ConnectionDao {
 
     @Override
     public Flux<User> getFollowersOfUser(Identity initiator, String id) {
-        return null;
+        String initiatorId = initiator.getId();
+        if (initiatorId.equals(id)) {
+            return connectionRepo.getOwnFollowers(initiatorId);
+        } else {
+            return connectionRepo.getFollowers(initiatorId, id);
+        }
     }
 
     @Override
     public Flux<User> getFollowedByUser(Identity initiator, String id) {
-        return null;
+        String initiatorId = initiator.getId();
+        if (initiatorId.equals(id)) {
+            return connectionRepo.getOwnFollowing(initiatorId);
+        } else {
+            return connectionRepo.getFollowing(initiatorId, id);
+        }
     }
 
     @Override
