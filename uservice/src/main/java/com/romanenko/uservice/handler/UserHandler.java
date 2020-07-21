@@ -45,14 +45,16 @@ public class UserHandler implements Routable {
     }
 
     private Mono<ServerResponse> getUser(ServerRequest request) {
+        String id = request.pathVariable("id");
         Mono<User> user = identityProvider.getIdentity(request)
-                .flatMap(e -> userDao.getUserById(request.pathVariable("id")));
+                .flatMap(identity -> userDao.getUserById(identity, id));
         return responseSupplier.ok(user);
     }
 
     public Mono<ServerResponse> getAll(ServerRequest request) {
+        String nickStart = request.pathVariable("nickStart");
         Flux<User> users = identityProvider.getIdentity(request)
-                .flatMapMany(e -> userDao.getAllByNickBeginning(request.pathVariable("nickStart")));
+                .flatMapMany(identity -> userDao.getAllByNickBeginning(identity, nickStart));
         return responseSupplier.ok(users);
     }
 }

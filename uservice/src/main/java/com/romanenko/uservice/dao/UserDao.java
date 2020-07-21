@@ -6,11 +6,11 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface UserDao {
-    Mono<Boolean> deleteById(Identity identity);
-
     Mono<User> saveUser(User user);
 
-    Flux<User> getAllByNickBeginning(String nickStart);
+    Mono<Boolean> deleteById(Identity identity);
 
-    Mono<User> getUserById(String id);
+    Mono<User> getUserById(Identity queryingIdentity, String id);
+
+    Flux<User> getAllByNickBeginning(Identity queryingIdentity, String nickStart);
 }
