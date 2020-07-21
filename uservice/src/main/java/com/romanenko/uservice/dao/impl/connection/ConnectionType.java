@@ -10,6 +10,8 @@ public enum ConnectionType {
     BLACKLIST(ConnectionType.BLACKLIST_NAME),
 
     ;
+    public static final String CONNECTION_NAME = "USER_CONNECTION";
+    public static final String CONNECTION_TYPE_LABEL = "type";
     public static final String FOLLOW_NAME = "follow";
     public static final String BLACKLIST_NAME = "follow";
     @Getter

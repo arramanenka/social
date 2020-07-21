@@ -1,22 +1,22 @@
 package com.romanenko.uservice.dao;
 
 import com.romanenko.security.Identity;
-import org.reactivestreams.Publisher;
+import com.romanenko.uservice.model.User;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface ConnectionDao {
-    Flux<String> getFollowersOfUser(Identity identity, String id);
+    Flux<User> getFollowersOfUser(Identity initiator, String id);
 
-    Flux<String> getFollowedByUser(Identity identity, String id);
+    Flux<User> getFollowedByUser(Identity initiator, String id);
 
-    Mono<Boolean> addFollower(Identity id, String followingId);
+    Mono<Void> addFollower(Identity initiator, String followingId);
 
-    Mono<Boolean> removeFollower(Identity id, String followingId);
+    Mono<Void> removeFollower(Identity initiator, String followingId);
 
-    Flux<String> getBlacklist(Identity identity);
+    Flux<User> getBlacklist(Identity identity);
 
-    Mono<Boolean> blacklist(Identity id, String blacklistedUser);
+    Mono<Void> blacklist(Identity initiator, String blacklistedUser);
 
-    Mono<Boolean> removeFromBlacklist(Identity id, String blacklistedUser);
+    Mono<Void> removeFromBlacklist(Identity initiator, String blacklistedUser);
 }

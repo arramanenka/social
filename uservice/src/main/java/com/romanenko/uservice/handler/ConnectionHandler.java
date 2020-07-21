@@ -5,6 +5,7 @@ import com.romanenko.routing.ApiBuilder;
 import com.romanenko.routing.Routable;
 import com.romanenko.security.IdentityProvider;
 import com.romanenko.uservice.dao.ConnectionDao;
+import com.romanenko.uservice.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -34,25 +35,23 @@ public class ConnectionHandler implements Routable {
 
     private Mono<ServerResponse> getAllFollowers(ServerRequest request) {
         String id = request.pathVariable("id");
-        Flux<String> users = identityProvider.getIdentity(request)
+        Flux<User> users = identityProvider.getIdentity(request)
                 .flatMapMany(identity -> connectionDao.getFollowersOfUser(identity, id));
-        return responseSupplier.ok(users, String.class);
+        return responseSupplier.ok(users, User.class);
     }
 
     private Mono<ServerResponse> getALlFollowing(ServerRequest request) {
         String id = request.pathVariable("id");
-        Flux<String> users = identityProvider.getIdentity(request)
+        Flux<User> users = identityProvider.getIdentity(request)
                 .flatMapMany(identity -> connectionDao.getFollowedByUser(identity, id));
-        return responseSupplier.ok(users, String.class);
+        return responseSupplier.ok(users, User.class);
     }
 
     private Mono<ServerResponse> addFollower(ServerRequest request) {
         String followingId = request.pathVariable("id");
         return identityProvider.getIdentity(request)
                 .flatMap(id -> connectionDao.addFollower(id, followingId))
-                .filter(e -> e)
                 .flatMap(e -> responseSupplier.noContent())
-                .switchIfEmpty(responseSupplier.badRequest("Could not add follower."))
                 .onErrorResume(responseSupplier::error);
     }
 
@@ -60,25 +59,21 @@ public class ConnectionHandler implements Routable {
         String followingId = request.pathVariable("id");
         return identityProvider.getIdentity(request)
                 .flatMap(id -> connectionDao.removeFollower(id, followingId))
-                .filter(e -> e)
                 .flatMap(e -> responseSupplier.noContent())
-                .switchIfEmpty(responseSupplier.badRequest("Could not remove follower."))
                 .onErrorResume(responseSupplier::error);
     }
 
     private Mono<ServerResponse> getAllBlacklisted(ServerRequest request) {
-        Flux<String> users = identityProvider.getIdentity(request)
+        Flux<User> users = identityProvider.getIdentity(request)
                 .flatMapMany(connectionDao::getBlacklist);
-        return responseSupplier.ok(users, String.class);
+        return responseSupplier.ok(users, User.class);
     }
 
     private Mono<ServerResponse> addToBlacklist(ServerRequest request) {
         String blacklistedUser = request.pathVariable("id");
         return identityProvider.getIdentity(request)
                 .flatMap(id -> connectionDao.blacklist(id, blacklistedUser))
-                .filter(e -> e)
                 .flatMap(e -> responseSupplier.noContent())
-                .switchIfEmpty(responseSupplier.badRequest("Could not put user into blacklist."))
                 .onErrorResume(responseSupplier::error);
     }
 
@@ -86,9 +81,7 @@ public class ConnectionHandler implements Routable {
         String blacklistedUser = request.pathVariable("id");
         return identityProvider.getIdentity(request)
                 .flatMap(id -> connectionDao.removeFromBlacklist(id, blacklistedUser))
-                .filter(e -> e)
                 .flatMap(e -> responseSupplier.noContent())
-                .switchIfEmpty(responseSupplier.badRequest("Could not remove user from blacklist."))
                 .onErrorResume(responseSupplier::error);
     }
 }
