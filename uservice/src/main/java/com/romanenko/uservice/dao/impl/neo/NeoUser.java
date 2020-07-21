@@ -1,4 +1,4 @@
-package com.romanenko.uservice.dao.impl.user.neo;
+package com.romanenko.uservice.dao.impl.neo;
 
 import com.romanenko.uservice.model.User;
 import lombok.AllArgsConstructor;
