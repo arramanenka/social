@@ -9,11 +9,9 @@ public interface ResponseSupplier {
 
     Mono<ServerResponse> ok(Object object);
 
-    Mono<ServerResponse> ok(Mono<?> object);
+    <T> Mono<ServerResponse> ok(Mono<T> object, Class<T> clazz);
 
-    Mono<ServerResponse> ok(Flux<?> flux);
-
-    Mono<ServerResponse> badRequest(Throwable e);
+    <T> Mono<ServerResponse> ok(Flux<T> flux, Class<T> clazz);
 
     Mono<ServerResponse> badRequest(String message);
 

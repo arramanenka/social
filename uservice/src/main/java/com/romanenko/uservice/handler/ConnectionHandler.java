@@ -36,14 +36,14 @@ public class ConnectionHandler implements Routable {
         String id = request.pathVariable("id");
         Flux<String> users = identityProvider.getIdentity(request)
                 .flatMapMany(identity -> connectionDao.getFollowersOfUser(identity, id));
-        return responseSupplier.ok(users);
+        return responseSupplier.ok(users, String.class);
     }
 
     private Mono<ServerResponse> getALlFollowing(ServerRequest request) {
         String id = request.pathVariable("id");
         Flux<String> users = identityProvider.getIdentity(request)
                 .flatMapMany(identity -> connectionDao.getFollowedByUser(identity, id));
-        return responseSupplier.ok(users);
+        return responseSupplier.ok(users, String.class);
     }
 
     private Mono<ServerResponse> addFollower(ServerRequest request) {
@@ -69,7 +69,7 @@ public class ConnectionHandler implements Routable {
     private Mono<ServerResponse> getAllBlacklisted(ServerRequest request) {
         Flux<String> users = identityProvider.getIdentity(request)
                 .flatMapMany(connectionDao::getBlacklist);
-        return responseSupplier.ok(users);
+        return responseSupplier.ok(users, String.class);
     }
 
     private Mono<ServerResponse> addToBlacklist(ServerRequest request) {

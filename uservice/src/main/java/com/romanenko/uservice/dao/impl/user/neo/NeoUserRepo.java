@@ -21,4 +21,9 @@ public interface NeoUserRepo extends ReactiveNeo4jRepository<NeoUser, String> {
             "return person")
     Mono<User> findUserById(String queryingId, String id);
 
+    @Query("create constraint user_name_constraint on (u:" + PRIMARY_LABEL + ") assert u." + NAME_LABEL + " is unique")
+    Mono<Void> createIndexOnName();
+
+    @Query("create constraint user_id_constraint on (u:" + PRIMARY_LABEL + ") assert u." + ID_LABEL + " is unique")
+    Mono<Void> createIndexOnId();
 }
