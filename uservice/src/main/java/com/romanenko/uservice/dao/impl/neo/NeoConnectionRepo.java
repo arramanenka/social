@@ -6,8 +6,6 @@ import org.neo4j.springframework.data.repository.query.Query;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Locale;
-
 import static com.romanenko.uservice.dao.impl.connection.ConnectionType.*;
 import static com.romanenko.uservice.dao.impl.neo.NeoUser.PRIMARY_LABEL;
 
@@ -48,8 +46,15 @@ public interface NeoConnectionRepo extends ReactiveNeo4jRepository<NeoUser, Stri
             "match (person)<-[:" + CONNECTION_NAME + "{" + CONNECTION_TYPE_LABEL + ": " + FOLLOW_NAME + "}]-(follower:" + PRIMARY_LABEL + ")\n" +
             "return follower")
     Flux<User> getFollowers(String id);
+
     @Query("match (person: " + PRIMARY_LABEL + ") where id(person) = $0 with person" +
             "match (person)-[:" + CONNECTION_NAME + "{" + CONNECTION_TYPE_LABEL + ": " + FOLLOW_NAME + "}]->(following:" + PRIMARY_LABEL + ")\n" +
             "return following")
     Flux<User> getFollowing(String id);
+
+    @Query("match (initiator: " + PRIMARY_LABEL + ") where id(initiator) = $0 with initiator\n" +
+            "match (followee: " + PRIMARY_LABEL + ") where id(followee) = $1 with followee, initiator\n" +
+            "match (initiator)-[con:" + CONNECTION_NAME + "}]->(followee)\n" +
+            "return con")
+    Mono<String> getConnection(String initiatorId, String otherPersonId);
 }
