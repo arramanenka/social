@@ -6,38 +6,40 @@ import org.neo4j.springframework.data.repository.query.Query;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Locale;
+
 import static com.romanenko.uservice.dao.impl.connection.ConnectionType.*;
 import static com.romanenko.uservice.dao.impl.neo.NeoUser.PRIMARY_LABEL;
 
 public interface NeoConnectionRepo extends ReactiveNeo4jRepository<NeoUser, String> {
 
-    @Query("match (initiator: " + PRIMARY_LABEL + ") where id(initiator) = $0 with initiator" +
-            "match (folowee: " + PRIMARY_LABEL + ") where id(folowee) = $1 with folowee, initiator" +
+    @Query("match (initiator: " + PRIMARY_LABEL + ") where id(initiator) = $0 with initiator\n" +
+            "match (folowee: " + PRIMARY_LABEL + ") where id(folowee) = $1 with folowee, initiator\n" +
             "merge (initiator)-[con:" + CONNECTION_NAME + "]->(folowee)\n" +
             "on create set con." + CONNECTION_TYPE_LABEL + "=\"" + FOLLOW_NAME + "\"\n" +
             "on match set con." + CONNECTION_TYPE_LABEL + "=\"" + FOLLOW_NAME + "\"")
     Mono<Void> follow(String initiatorId, String followingId);
 
-    @Query("match (initiator: " + PRIMARY_LABEL + ") where id(initiator) = $0 with initiator" +
-            "match (folowee: " + PRIMARY_LABEL + ") where id(folowee) = $1 with folowee, initiator" +
+    @Query("match (initiator: " + PRIMARY_LABEL + ") where id(initiator) = $0 with initiator\n" +
+            "match (folowee: " + PRIMARY_LABEL + ") where id(folowee) = $1 with folowee, initiator\n" +
             "match (initiator)-[con:" + CONNECTION_NAME + "{type: " + FOLLOW_NAME + "}]->(folowee)\n" +
             "delete con")
     Mono<Void> unfollow(String initiatorId, String followingId);
 
-    @Query("match (initiator: " + PRIMARY_LABEL + ") where id(initiator) = $0 with initiator" +
-            "match (blacklisted: " + PRIMARY_LABEL + ") where id(blacklisted) = $1 with initiator, blacklisted" +
+    @Query("match (initiator: " + PRIMARY_LABEL + ") where id(initiator) = $0 with initiator\n" +
+            "match (blacklisted: " + PRIMARY_LABEL + ") where id(blacklisted) = $1 with initiator, blacklisted\n" +
             "merge (initiator)-[con:" + CONNECTION_NAME + "]->(blacklisted)\n" +
             "on create set con." + CONNECTION_TYPE_LABEL + "=\"" + BLACKLIST_NAME + "\"\n" +
             "on match set con." + CONNECTION_TYPE_LABEL + "=\"" + BLACKLIST_NAME + "\"")
     Mono<Void> blacklist(String initiatorId, String blacklistedUser);
 
-    @Query("match (initiator: " + PRIMARY_LABEL + ") where id(initiator) = $0 with initiator" +
-            "match (blacklisted: " + PRIMARY_LABEL + ") where id(blacklisted) = $1 with blacklisted, initiator" +
+    @Query("match (initiator: " + PRIMARY_LABEL + ") where id(initiator) = $0 with initiator\n" +
+            "match (blacklisted: " + PRIMARY_LABEL + ") where id(blacklisted) = $1 with blacklisted, initiator\n" +
             "match (initiator)-[con:" + CONNECTION_NAME + "{" + CONNECTION_TYPE_LABEL + ": " + BLACKLIST_NAME + "}]->(blacklisted)\n" +
             "delete con")
     Mono<Void> removeFromBlacklist(String initiatorId, String blacklistedUser);
 
-    @Query("match (initiator: " + PRIMARY_LABEL + ") where id(initiator) = $0 with initiator" +
+    @Query("match (initiator: " + PRIMARY_LABEL + ") where id(initiator) = $0 with initiator\n" +
             "match (initiator)-[:" + CONNECTION_NAME + "{" + CONNECTION_TYPE_LABEL + ": " + BLACKLIST_NAME + "}]->(blacklisted:" + PRIMARY_LABEL + ")\n" +
             "return blacklisted")
     Flux<User> getBlacklist(String id);
