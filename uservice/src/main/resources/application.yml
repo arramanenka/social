@@ -4,5 +4,5 @@ org:
     driver.uri: bolt://localhost:7687
     driver:
       authentication:
-        username: neo
-        password: neo
+        username: neo4j
+        password: neo4j
