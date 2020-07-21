@@ -42,17 +42,12 @@ public interface NeoConnectionRepo extends ReactiveNeo4jRepository<NeoUser, Stri
             "return blacklisted")
     Flux<User> getBlacklist(String id);
 
-    @Query("match (initiator: " + PRIMARY_LABEL + ") where id(initiator) = $0 with initiator" +
-            "match (initiator)<-[:" + CONNECTION_NAME + "{" + CONNECTION_TYPE_LABEL + ": " + FOLLOW_NAME + "}]-(follower:" + PRIMARY_LABEL + ")\n" +
+    @Query("match (person: " + PRIMARY_LABEL + ") where id(person) = $0 with person" +
+            "match (person)<-[:" + CONNECTION_NAME + "{" + CONNECTION_TYPE_LABEL + ": " + FOLLOW_NAME + "}]-(follower:" + PRIMARY_LABEL + ")\n" +
             "return follower")
-    Flux<User> getOwnFollowers(String initiatorId);
-
-    @Query("match (initiator: " + PRIMARY_LABEL + ") where id(initiator) = $0 with initiator" +
-            "match (initiator)-[:" + CONNECTION_NAME + "{" + CONNECTION_TYPE_LABEL + ": " + FOLLOW_NAME + "}]->(following:" + PRIMARY_LABEL + ")\n" +
+    Flux<User> getFollowers(String id);
+    @Query("match (person: " + PRIMARY_LABEL + ") where id(person) = $0 with person" +
+            "match (person)-[:" + CONNECTION_NAME + "{" + CONNECTION_TYPE_LABEL + ": " + FOLLOW_NAME + "}]->(following:" + PRIMARY_LABEL + ")\n" +
             "return following")
-    Flux<User> getOwnFollowing(String initiatorId);
-
-    Flux<User> getFollowers(String initiatorId, String id);
-
-    Flux<User> getFollowing(String initiatorId, String id);
+    Flux<User> getFollowing(String id);
 }

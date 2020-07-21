@@ -2,6 +2,8 @@ package com.romanenko.uservice.dao.impl.user.neo;
 
 import com.romanenko.security.Identity;
 import com.romanenko.uservice.dao.ConnectionDao;
+import com.romanenko.uservice.dao.DirectConnectionDao;
+import com.romanenko.uservice.dao.impl.connection.ConnectionType;
 import com.romanenko.uservice.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,25 +17,36 @@ import reactor.core.publisher.Mono;
 public class NeoConnectionDao implements ConnectionDao {
 
     private final NeoConnectionRepo connectionRepo;
+    private final DirectConnectionDao directConnectionDao;
 
     @Override
     public Flux<User> getFollowersOfUser(Identity initiator, String id) {
         String initiatorId = initiator.getId();
         if (initiatorId.equals(id)) {
-            return connectionRepo.getOwnFollowers(initiatorId);
-        } else {
-            return connectionRepo.getFollowers(initiatorId, id);
+            return connectionRepo.getFollowers(initiatorId);
         }
+        return directConnectionDao.getRelations(initiatorId, id)
+                .flatMapMany(connectionType -> {
+                    if (!connectionType.equals(ConnectionType.BLACKLIST)) {
+                        return connectionRepo.getFollowers(id);
+                    }
+                    return Mono.error(new HttpClientErrorException(HttpStatus.FORBIDDEN));
+                });
     }
 
     @Override
     public Flux<User> getFollowedByUser(Identity initiator, String id) {
         String initiatorId = initiator.getId();
         if (initiatorId.equals(id)) {
-            return connectionRepo.getOwnFollowing(initiatorId);
-        } else {
-            return connectionRepo.getFollowing(initiatorId, id);
+            return connectionRepo.getFollowing(initiatorId);
         }
+        return directConnectionDao.getRelations(initiatorId, id)
+                .flatMapMany(connectionType -> {
+                    if (!connectionType.equals(ConnectionType.BLACKLIST)) {
+                        return connectionRepo.getFollowing(id);
+                    }
+                    return Mono.error(new HttpClientErrorException(HttpStatus.FORBIDDEN));
+                });
     }
 
     @Override
