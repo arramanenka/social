@@ -1,8 +1,8 @@
 org:
   #should be overridden with env
   neo4j:
-    driver.uri: bolt://localhost:7687
+    driver.uri: ${NEO4J_URI:bolt://localhost:7687}
     driver:
       authentication:
-        username: neo4j
-        password: neo4j
+        username: ${NEO4J_USERNAME:neo4j}
+        password: ${NEO4J_PASSWORD:neo4j}
