@@ -1,13 +1,13 @@
-package com.romanenko.uservice;
+package com.romanenko;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class UserviceApplication {
+public class Launcher {
 
     public static void main(String[] args) {
-        SpringApplication.run(UserviceApplication.class, args);
+        SpringApplication.run(Launcher.class, args);
     }
 
 }

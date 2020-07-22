@@ -33,6 +33,12 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.romanenko.Launcher</mainClass>
+                    <image>
+                        <name>arramanenka/uservice</name>
+                    </image>
+                </configuration>
             </plugin>
         </plugins>
     </build>

@@ -1,6 +1,6 @@
-package com.romanenko.uservice.dao;
+package com.romanenko.dao;
 
-import com.romanenko.uservice.dao.impl.connection.ConnectionType;
+import com.romanenko.dao.impl.connection.ConnectionType;
 import reactor.core.publisher.Mono;
 
 public interface DirectConnectionDao {

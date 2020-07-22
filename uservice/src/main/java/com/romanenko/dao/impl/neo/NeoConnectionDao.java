@@ -1,10 +1,10 @@
-package com.romanenko.uservice.dao.impl.neo;
+package com.romanenko.dao.impl.neo;
 
 import com.romanenko.security.Identity;
-import com.romanenko.uservice.dao.ConnectionDao;
-import com.romanenko.uservice.dao.DirectConnectionDao;
-import com.romanenko.uservice.dao.impl.connection.ConnectionType;
-import com.romanenko.uservice.model.User;
+import com.romanenko.dao.ConnectionDao;
+import com.romanenko.dao.DirectConnectionDao;
+import com.romanenko.dao.impl.connection.ConnectionType;
+import com.romanenko.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;

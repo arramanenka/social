@@ -1,11 +1,11 @@
-package com.romanenko.uservice.handler;
+package com.romanenko.handler;
 
 import com.romanenko.io.ResponseSupplier;
 import com.romanenko.routing.ApiBuilder;
 import com.romanenko.routing.Routable;
 import com.romanenko.security.IdentityProvider;
-import com.romanenko.uservice.dao.ConnectionDao;
-import com.romanenko.uservice.model.User;
+import com.romanenko.dao.ConnectionDao;
+import com.romanenko.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;

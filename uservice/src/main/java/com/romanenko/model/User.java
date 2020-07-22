@@ -1,4 +1,4 @@
-package com.romanenko.uservice.model;
+package com.romanenko.model;
 
 import lombok.Builder;
 import lombok.Data;

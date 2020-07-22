@@ -1,6 +1,6 @@
-package com.romanenko.uservice.dao.impl.neo;
+package com.romanenko.dao.impl.neo;
 
-import com.romanenko.uservice.model.User;
+import com.romanenko.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

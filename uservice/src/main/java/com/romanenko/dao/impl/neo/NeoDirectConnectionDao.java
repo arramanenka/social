@@ -1,7 +1,7 @@
-package com.romanenko.uservice.dao.impl.neo;
+package com.romanenko.dao.impl.neo;
 
-import com.romanenko.uservice.dao.DirectConnectionDao;
-import com.romanenko.uservice.dao.impl.connection.ConnectionType;
+import com.romanenko.dao.DirectConnectionDao;
+import com.romanenko.dao.impl.connection.ConnectionType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;

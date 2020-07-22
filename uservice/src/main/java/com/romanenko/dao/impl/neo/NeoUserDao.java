@@ -1,8 +1,8 @@
-package com.romanenko.uservice.dao.impl.neo;
+package com.romanenko.dao.impl.neo;
 
+import com.romanenko.dao.UserDao;
 import com.romanenko.security.Identity;
-import com.romanenko.uservice.dao.UserDao;
-import com.romanenko.uservice.model.User;
+import com.romanenko.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;

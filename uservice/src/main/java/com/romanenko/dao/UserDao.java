@@ -1,7 +1,7 @@
-package com.romanenko.uservice.dao;
+package com.romanenko.dao;
 
 import com.romanenko.security.Identity;
-import com.romanenko.uservice.model.User;
+import com.romanenko.model.User;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

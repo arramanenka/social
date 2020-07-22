@@ -1,7 +1,7 @@
-package com.romanenko.uservice.dao.impl.neo;
+package com.romanenko.dao.impl.neo;
 
-import com.romanenko.uservice.dao.impl.connection.ConnectionType;
-import com.romanenko.uservice.model.User;
+import com.romanenko.dao.impl.connection.ConnectionType;
+import com.romanenko.model.User;
 import org.neo4j.springframework.data.repository.ReactiveNeo4jRepository;
 import org.neo4j.springframework.data.repository.query.Query;
 import reactor.core.publisher.Flux;
