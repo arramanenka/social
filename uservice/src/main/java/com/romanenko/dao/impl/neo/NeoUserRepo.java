@@ -10,13 +10,14 @@ import reactor.core.publisher.Mono;
 public interface NeoUserRepo extends ReactiveNeo4jRepository<NeoUser, String> {
     Mono<Boolean> deleteByPuId(String puId);
 
-    @Query("match (queryingPerson: " + NeoUser.PRIMARY_LABEL + ") where id(queryingPerson) = $0 with queryingPerson" +
-            "match (person:" + NeoUser.PRIMARY_LABEL + ") where " + NeoUser.NAME_LABEL + " starts with $1 AND (person)-[:" + ConnectionType.BLACKLIST_NAME + "*]-(queryingPerson)" +
+    @Query("match (queryingPerson: " + NeoUser.PRIMARY_LABEL + ") where id(queryingPerson) = $0 with queryingPerson\n" +
+            "match (person:" + NeoUser.PRIMARY_LABEL + ") where person." + NeoUser.NAME_LABEL +
+            " starts with $1 AND (person)-[:" + ConnectionType.BLACKLIST_NAME + "*]-(queryingPerson)\n" +
             "return person")
     Flux<NeoUser> getAllByNickBeginning(String id, String nickStart);
 
-    @Query("match (queryingPerson: " + NeoUser.PRIMARY_LABEL + ") where id(queryingPerson) = $0 with queryingPerson" +
-            "match (person:" + NeoUser.PRIMARY_LABEL + ") where id(person) = $1 AND (person)-[:" + ConnectionType.BLACKLIST_NAME + "*]-(queryingPerson)" +
+    @Query("match (queryingPerson: " + NeoUser.PRIMARY_LABEL + ") where id(queryingPerson) = $0 with queryingPerson\n" +
+            "match (person:" + NeoUser.PRIMARY_LABEL + ") where id(person) = $1 AND (person)-[:" + ConnectionType.BLACKLIST_NAME + "*]-(queryingPerson)\n" +
             "return person")
     Mono<User> findUserById(String queryingId, String id);
 
