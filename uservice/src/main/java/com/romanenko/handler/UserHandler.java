@@ -34,6 +34,7 @@ public class UserHandler implements Routable {
                 .flatMap(e -> request.bodyToMono(User.class).doOnSuccess(u -> u.setId(e.getId())))
                 .flatMap(userDao::saveUser)
                 .flatMap(responseSupplier::ok)
+                .onErrorResume(NullPointerException.class, e -> responseSupplier.badRequest("Incomplete request body.", e))
                 .onErrorResume(responseSupplier::error);
     }
 

@@ -13,6 +13,8 @@ public interface ResponseSupplier {
 
     <T> Mono<ServerResponse> ok(Flux<T> flux, Class<T> clazz);
 
+    Mono<ServerResponse> badRequest(String message, Exception e);
+
     Mono<ServerResponse> badRequest(String message);
 
     Mono<ServerResponse> noContent();

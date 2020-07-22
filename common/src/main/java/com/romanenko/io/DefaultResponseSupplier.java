@@ -44,10 +44,16 @@ public class DefaultResponseSupplier implements ResponseSupplier {
     }
 
     @Override
+    public Mono<ServerResponse> badRequest(String message, Exception e) {
+        log.error(e);
+        return badRequest(message);
+    }
+
+    @Override
     public Mono<ServerResponse> badRequest(String message) {
         return ServerResponse.badRequest()
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(message);
+                .bodyValue(createResponseMessage(message));
     }
 
     @Override
@@ -60,5 +66,9 @@ public class DefaultResponseSupplier implements ResponseSupplier {
         }
         log.error(e);
         return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+    private String createResponseMessage(String message) {
+        return "{\"details\":\"" + message + "\"}";
     }
 }
