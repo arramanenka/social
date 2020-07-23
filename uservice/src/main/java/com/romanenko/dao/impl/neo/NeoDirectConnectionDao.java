@@ -16,8 +16,13 @@ public class NeoDirectConnectionDao implements DirectConnectionDao {
     public Mono<ConnectionType> getRelations(String initiatorId, String otherPersonId) {
         return connectionRepo.getConnection(initiatorId, otherPersonId)
                 .map(ConnectionType::forName)
-                .flatMap(e -> connectionRepo.getConnection(otherPersonId, initiatorId)
-                        .map(ConnectionType::forName)
-                        .map(e::combine));
+                .flatMap(e -> {
+                    if (e.equals(ConnectionType.BLACKLIST)) {
+                        return Mono.just(e);
+                    }
+                    return connectionRepo.getConnection(otherPersonId, initiatorId)
+                            .map(ConnectionType::forName)
+                            .map(e::combine);
+                });
     }
 }
