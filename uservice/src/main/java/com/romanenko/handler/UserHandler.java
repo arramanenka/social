@@ -49,7 +49,7 @@ public class UserHandler implements Routable {
         String id = request.pathVariable("id");
         Mono<User> user = identityProvider.getIdentity(request)
                 .flatMap(identity -> userDao.getUserById(identity, id));
-        return responseSupplier.ok(user, User.class);
+        return responseSupplier.questionable_ok(user, User.class);
     }
 
     public Mono<ServerResponse> getAll(ServerRequest request) {
