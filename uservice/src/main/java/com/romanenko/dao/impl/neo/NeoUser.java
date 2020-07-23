@@ -16,7 +16,7 @@ public class NeoUser {
     public static final String PRIMARY_LABEL = "app_user";
     public static final String NAME_LABEL = "name";
     public static final String AVATAR_LABEL = "avatar";
-    public static final String ID_LABEL = "id";
+    public static final String ID_LABEL = "puId";
     @Property(name = NAME_LABEL)
     private String name;
     @Id
