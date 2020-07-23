@@ -13,6 +13,14 @@ public interface ResponseSupplier {
 
     <T> Mono<ServerResponse> ok(Flux<T> flux, Class<T> clazz);
 
+    /**
+     * perform check for collection being empty + handle any exception
+     */
+    <T> Mono<ServerResponse> questionable_ok(Mono<T> object, Class<T> clazz);
+
+    /**
+     * perform check for collection being empty + handle any exception
+     */
     <T> Mono<ServerResponse> questionable_ok(Flux<T> flux, Class<T> clazz);
 
     Mono<ServerResponse> badRequest(String message, Exception e);

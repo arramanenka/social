@@ -49,18 +49,16 @@ public class ConnectionHandler implements Routable {
 
     private Mono<ServerResponse> addFollower(ServerRequest request) {
         String followingId = request.pathVariable("id");
-        return identityProvider.getIdentity(request)
-                .flatMap(id -> connectionDao.addFollower(id, followingId))
-                .flatMap(e -> responseSupplier.noContent())
-                .onErrorResume(responseSupplier::error);
+        Mono<Void> result = identityProvider.getIdentity(request)
+                .flatMap(id -> connectionDao.addFollower(id, followingId));
+        return responseSupplier.questionable_ok(result, Void.class);
     }
 
     private Mono<ServerResponse> removeFollower(ServerRequest request) {
         String followingId = request.pathVariable("id");
-        return identityProvider.getIdentity(request)
-                .flatMap(id -> connectionDao.removeFollower(id, followingId))
-                .flatMap(e -> responseSupplier.noContent())
-                .onErrorResume(responseSupplier::error);
+        Mono<Void> result = identityProvider.getIdentity(request)
+                .flatMap(id -> connectionDao.removeFollower(id, followingId));
+        return responseSupplier.questionable_ok(result, Void.class);
     }
 
     private Mono<ServerResponse> getAllBlacklisted(ServerRequest request) {
@@ -71,17 +69,15 @@ public class ConnectionHandler implements Routable {
 
     private Mono<ServerResponse> addToBlacklist(ServerRequest request) {
         String blacklistedUser = request.pathVariable("id");
-        return identityProvider.getIdentity(request)
-                .flatMap(id -> connectionDao.blacklist(id, blacklistedUser))
-                .flatMap(e -> responseSupplier.noContent())
-                .onErrorResume(responseSupplier::error);
+        Mono<Void> result = identityProvider.getIdentity(request)
+                .flatMap(id -> connectionDao.blacklist(id, blacklistedUser));
+        return responseSupplier.questionable_ok(result, Void.class);
     }
 
     private Mono<ServerResponse> removeFromBlacklist(ServerRequest request) {
         String blacklistedUser = request.pathVariable("id");
-        return identityProvider.getIdentity(request)
-                .flatMap(id -> connectionDao.removeFromBlacklist(id, blacklistedUser))
-                .flatMap(e -> responseSupplier.noContent())
-                .onErrorResume(responseSupplier::error);
+        Mono<Void> result = identityProvider.getIdentity(request)
+                .flatMap(id -> connectionDao.removeFromBlacklist(id, blacklistedUser));
+        return responseSupplier.questionable_ok(result, Void.class);
     }
 }
