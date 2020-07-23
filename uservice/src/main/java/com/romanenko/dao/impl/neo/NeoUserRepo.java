@@ -10,20 +10,14 @@ import reactor.core.publisher.Mono;
 public interface NeoUserRepo extends ReactiveNeo4jRepository<NeoUser, String> {
     Mono<Boolean> deleteByPuId(String puId);
 
-    @Query("match (queryingPerson: " + NeoUser.PRIMARY_LABEL + ") where id(queryingPerson) = $0 with queryingPerson\n" +
+    @Query("match (queryingPerson: " + NeoUser.PRIMARY_LABEL + " {" + NeoUser.ID_LABEL + ": $0}) with queryingPerson\n" +
             "match (person:" + NeoUser.PRIMARY_LABEL + ") where person." + NeoUser.NAME_LABEL +
             " starts with $1 AND (person)-[:" + ConnectionType.BLACKLIST_NAME + "*]-(queryingPerson)\n" +
             "return person")
     Flux<NeoUser> getAllByNickBeginning(String id, String nickStart);
 
-    @Query("match (queryingPerson: " + NeoUser.PRIMARY_LABEL + ") where id(queryingPerson) = $0 with queryingPerson\n" +
-            "match (person:" + NeoUser.PRIMARY_LABEL + ") where id(person) = $1 AND (person)-[:" + ConnectionType.BLACKLIST_NAME + "*]-(queryingPerson)\n" +
+    @Query("match (queryingPerson: " + NeoUser.PRIMARY_LABEL + " {" + NeoUser.ID_LABEL + ": $0}) with queryingPerson\n" +
+            "match (person:" + NeoUser.PRIMARY_LABEL + " {" + NeoUser.ID_LABEL + ": $1}) where (person)-[:" + ConnectionType.BLACKLIST_NAME + "*]-(queryingPerson)\n" +
             "return person")
     Mono<User> findUserById(String queryingId, String id);
-
-    @Query("create constraint user_name_constraint on (u:" + NeoUser.PRIMARY_LABEL + ") assert u." + NeoUser.NAME_LABEL + " is unique")
-    Mono<Void> createIndexOnName();
-
-    @Query("create constraint user_id_constraint on (u:" + NeoUser.PRIMARY_LABEL + ") assert u." + NeoUser.ID_LABEL + " is unique")
-    Mono<Void> createIndexOnId();
 }
