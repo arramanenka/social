@@ -14,7 +14,7 @@ public enum ConnectionType {
     public static final String CONNECTION_NAME = "USER_CONNECTION";
     public static final String CONNECTION_TYPE_LABEL = "type";
     public static final String FOLLOW_NAME = "follow";
-    public static final String BLACKLIST_NAME = "follow";
+    public static final String BLACKLIST_NAME = "blacklist";
     public static final String FRIEND_NAME = "friend";
     private final String name;
     private final int numberRepresentation;
