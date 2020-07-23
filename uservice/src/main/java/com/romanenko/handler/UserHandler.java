@@ -56,6 +56,6 @@ public class UserHandler implements Routable {
         String nickStart = request.pathVariable("nickStart");
         Flux<User> users = identityProvider.getIdentity(request)
                 .flatMapMany(identity -> userDao.getAllByNickBeginning(identity, nickStart));
-        return responseSupplier.ok(users, User.class);
+        return responseSupplier.questionable_ok(users, User.class);
     }
 }

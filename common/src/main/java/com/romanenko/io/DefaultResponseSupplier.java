@@ -43,6 +43,12 @@ public class DefaultResponseSupplier implements ResponseSupplier {
                 .contentType(MediaType.APPLICATION_STREAM_JSON)
                 .body(flux, clazz);
     }
+    @Override
+    public <T> Mono<ServerResponse> questionable_ok(Flux<T> flux, Class<T> clazz) {
+        return flux.hasElements()
+                .flatMap(hasElements-> hasElements? ok(flux, clazz) : noContent())
+                .onErrorResume(this::error);
+    }
 
     @Override
     public Mono<ServerResponse> badRequest(String message, Exception e) {
