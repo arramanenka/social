@@ -1,16 +1,17 @@
 package com.romanenko.dao.impl.neo;
 
-import com.romanenko.security.Identity;
 import com.romanenko.dao.ConnectionDao;
 import com.romanenko.dao.DirectConnectionDao;
 import com.romanenko.dao.impl.connection.ConnectionType;
 import com.romanenko.model.User;
+import com.romanenko.security.Identity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @Component
 @RequiredArgsConstructor
@@ -55,7 +56,9 @@ public class NeoConnectionDao implements ConnectionDao {
         if (initiatorId.equals(followingId)) {
             return Mono.error(new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Cannot follow thyself"));
         }
-        return connectionRepo.follow(initiatorId, followingId);
+        return connectionRepo.follow(initiatorId, followingId)
+                .doOnSuccess(r -> directConnectionDao.recalculateRelations(initiatorId, followingId, ConnectionType.FOLLOW)
+                        .subscribeOn(Schedulers.parallel()).subscribe());
     }
 
     @Override
@@ -64,7 +67,9 @@ public class NeoConnectionDao implements ConnectionDao {
         if (initiatorId.equals(followingId)) {
             return Mono.error(new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Cannot follow thyself"));
         }
-        return connectionRepo.unfollow(initiatorId, followingId);
+        return connectionRepo.unfollow(initiatorId, followingId)
+                .doOnSuccess(r -> directConnectionDao.recalculateRelations(initiatorId, followingId, ConnectionType.NONE)
+                        .subscribeOn(Schedulers.parallel()).subscribe());
     }
 
     @Override
@@ -78,7 +83,9 @@ public class NeoConnectionDao implements ConnectionDao {
         if (initiatorId.equals(blacklistedUser)) {
             return Mono.error(new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Cannot blacklist thyself"));
         }
-        return connectionRepo.blacklist(initiatorId, blacklistedUser);
+        return connectionRepo.blacklist(initiatorId, blacklistedUser)
+                .doOnSuccess(r -> directConnectionDao.recalculateRelations(initiatorId, blacklistedUser, ConnectionType.BLACKLIST)
+                        .subscribeOn(Schedulers.parallel()).subscribe());
     }
 
     @Override
@@ -87,6 +94,8 @@ public class NeoConnectionDao implements ConnectionDao {
         if (initiatorId.equals(blacklistedUser)) {
             return Mono.error(new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Cannot blacklist thyself"));
         }
-        return connectionRepo.removeFromBlacklist(initiatorId, blacklistedUser);
+        return connectionRepo.removeFromBlacklist(initiatorId, blacklistedUser)
+                .doOnSuccess(r -> directConnectionDao.recalculateRelations(initiatorId, blacklistedUser, ConnectionType.NONE)
+                        .subscribeOn(Schedulers.parallel()).subscribe());
     }
 }
