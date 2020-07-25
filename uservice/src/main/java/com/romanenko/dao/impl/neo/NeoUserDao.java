@@ -17,7 +17,7 @@ public class NeoUserDao implements UserDao {
     @Override
     public Mono<User> saveUser(User user) {
         return userRepo.save(new NeoUser(user))
-                .map(NeoUser::toModel);
+                .map(NeoUser::toSimpleModel);
     }
 
     @Override
@@ -28,7 +28,7 @@ public class NeoUserDao implements UserDao {
     @Override
     public Flux<User> getAllByNickBeginning(Identity queryingIdentity, String nickStart) {
         return userRepo.getAllByNickBeginning(queryingIdentity.getId(), nickStart)
-                .map(NeoUser::toModel);
+                .map(NeoUser::toSimpleModel);
     }
 
     @Override
@@ -36,9 +36,9 @@ public class NeoUserDao implements UserDao {
         String queryingUserId = queryingIdentity.getId();
         if (queryingUserId.equals(id)){
             return userRepo.findSelf(id)
-                    .map(NeoUser::toModel);
+                    .map(NeoUser::toSimpleModel);
         }
         return userRepo.findUserById(queryingUserId, id)
-                .map(NeoUser::toModel);
+                .map(NeoUser::toSimpleModel);
     }
 }

@@ -25,13 +25,13 @@ public class NeoConnectionDao implements ConnectionDao {
         String initiatorId = initiator.getId();
         if (initiatorId.equals(id)) {
             return connectionRepo.getFollowers(initiatorId)
-                    .map(NeoUser::toModel);
+                    .map(NeoUser::toSimpleModel);
         }
         return directConnectionDao.getRelations(initiatorId, id)
                 .flatMapMany(connectionType -> {
                     if (!connectionType.equals(ConnectionType.BLACKLIST)) {
                         return connectionRepo.getFollowers(id)
-                                .map(NeoUser::toModel);
+                                .map(NeoUser::toSimpleModel);
                     }
                     return Mono.error(new HttpClientErrorException(HttpStatus.FORBIDDEN));
                 });
@@ -42,13 +42,13 @@ public class NeoConnectionDao implements ConnectionDao {
         String initiatorId = initiator.getId();
         if (initiatorId.equals(id)) {
             return connectionRepo.getFollowing(initiatorId)
-                    .map(NeoUser::toModel);
+                    .map(NeoUser::toSimpleModel);
         }
         return directConnectionDao.getRelations(initiatorId, id)
                 .flatMapMany(connectionType -> {
                     if (!connectionType.equals(ConnectionType.BLACKLIST)) {
                         return connectionRepo.getFollowing(id)
-                                .map(NeoUser::toModel);
+                                .map(NeoUser::toSimpleModel);
                     }
                     return Mono.error(new HttpClientErrorException(HttpStatus.FORBIDDEN));
                 });
@@ -79,7 +79,7 @@ public class NeoConnectionDao implements ConnectionDao {
     @Override
     public Flux<User> getBlacklist(Identity identity) {
         return connectionRepo.getBlacklist(identity.getId())
-                .map(NeoUser::toModel);
+                .map(NeoUser::toSimpleModel);
     }
 
     @Override

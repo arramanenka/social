@@ -31,7 +31,7 @@ public class NeoUser {
         avatarUrl = user.getAvatarUrl();
     }
 
-    public User toModel() {
+    public User toSimpleModel() {
         return User.builder()
                 .name(name)
                 .id(puId)
