@@ -1,6 +1,6 @@
 package com.romanenko.dao.impl.neo;
 
-import com.romanenko.dao.impl.connection.ConnectionType;
+import com.romanenko.connection.ConnectionType;
 import com.romanenko.model.User;
 import org.neo4j.springframework.data.repository.ReactiveNeo4jRepository;
 import org.neo4j.springframework.data.repository.query.Query;

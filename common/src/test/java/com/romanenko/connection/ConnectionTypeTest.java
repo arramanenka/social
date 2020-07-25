@@ -1,8 +1,8 @@
-package com.romanenko.dao.impl.connection;
+package com.romanenko.connection;
 
 import org.junit.jupiter.api.Test;
 
-import static com.romanenko.dao.impl.connection.ConnectionType.*;
+import static com.romanenko.connection.ConnectionType.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ConnectionTypeTest {

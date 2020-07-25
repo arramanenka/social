@@ -6,7 +6,7 @@ import org.neo4j.springframework.data.repository.query.Query;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import static com.romanenko.dao.impl.connection.ConnectionType.*;
+import static com.romanenko.connection.ConnectionType.*;
 import static com.romanenko.dao.impl.neo.NeoUser.*;
 
 public interface NeoConnectionRepo extends ReactiveNeo4jRepository<NeoUser, String> {

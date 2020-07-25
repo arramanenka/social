@@ -1,4 +1,4 @@
-package com.romanenko.dao.impl.connection;
+package com.romanenko.connection;
 
 import lombok.RequiredArgsConstructor;
 

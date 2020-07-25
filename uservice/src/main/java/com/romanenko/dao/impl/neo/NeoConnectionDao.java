@@ -2,7 +2,7 @@ package com.romanenko.dao.impl.neo;
 
 import com.romanenko.dao.ConnectionDao;
 import com.romanenko.dao.DirectConnectionDao;
-import com.romanenko.dao.impl.connection.ConnectionType;
+import com.romanenko.connection.ConnectionType;
 import com.romanenko.model.User;
 import com.romanenko.security.Identity;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,7 @@
 package com.romanenko.dao.impl.neo;
 
 import com.romanenko.dao.DirectConnectionDao;
-import com.romanenko.dao.impl.connection.ConnectionType;
+import com.romanenko.connection.ConnectionType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
