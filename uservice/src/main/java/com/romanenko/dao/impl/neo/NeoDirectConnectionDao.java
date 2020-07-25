@@ -1,21 +1,26 @@
 package com.romanenko.dao.impl.neo;
 
-import com.romanenko.dao.DirectConnectionDao;
 import com.romanenko.connection.ConnectionType;
+import com.romanenko.connection.UserConnectionCache;
+import com.romanenko.dao.DirectConnectionDao;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @Component
 @RequiredArgsConstructor
 public class NeoDirectConnectionDao implements DirectConnectionDao {
     private final NeoConnectionRepo connectionRepo;
+    private final UserConnectionCache connectionCache;
 
-    //TODO add cache via redis
     @Override
     public Mono<ConnectionType> getRelations(String initiatorId, String otherPersonId) {
+        return connectionCache.getCachedConnectionType(initiatorId, otherPersonId)
+                .switchIfEmpty(getNonCachedRelations(initiatorId, otherPersonId));
+    }
+
+    private Mono<ConnectionType> getNonCachedRelations(String initiatorId, String otherPersonId) {
         return connectionRepo.getConnection(initiatorId, otherPersonId)
                 .map(ConnectionType::forName)
                 .switchIfEmpty(Mono.just(ConnectionType.NONE))
@@ -27,11 +32,15 @@ public class NeoDirectConnectionDao implements DirectConnectionDao {
                             .map(ConnectionType::forName)
                             .map(e::combine)
                             .switchIfEmpty(Mono.just(ConnectionType.NONE));
-                });
+                })
+                .doOnSuccess(e -> connectionCache.saveConnection(initiatorId, otherPersonId, e)
+                        .subscribeOn(Schedulers.parallel())
+                        .subscribe()
+                );
     }
 
     @Override
     public Mono<Void> recalculateRelations(String initiatorId, String otherPersonId, ConnectionType connection) {
-        return Mono.error(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "not implemented"));
+        return connectionCache.clearConnection(initiatorId, otherPersonId);
     }
 }

@@ -23,6 +23,7 @@
         <module>uservice</module>
         <module>web-common</module>
         <module>common</module>
+        <module>cache</module>
     </modules>
 
     <dependencies>
