@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Optional;
+
 @Component
 @RequiredArgsConstructor
 public class NeoUserDao implements UserDao {
@@ -37,7 +39,7 @@ public class NeoUserDao implements UserDao {
         String queryingUserId = queryingIdentity.getId();
         if (queryingUserId.equals(id)) {
             return userRepo.findSelf(id)
-                    .map(NeoUser::toFullProfileModel);
+                    .map(NeoUser::convertFullProfile);
         }
         return userRepo.findUserById(queryingUserId, id)
                 .map(NeoUser::toFullProfileModel);
