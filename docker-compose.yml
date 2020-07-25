@@ -3,8 +3,16 @@ services:
   neo:
     image: neo4j:latest
     environment:
-      - NEO4J_AUTH=neo4j/neo4j
+      - NEO4J_AUTH=neo4j/pnumbah
     ports:
       - '7687:7687'
       - '7474:7474'
+    restart: on-failure
+  redis:
+    image: redis:latest
+    command: redis-server --requirepass qwerty
+    ports:
+      - 6379:6379
+    environment:
+      - REDIS_REPLICATION_MODE=master
     restart: on-failure

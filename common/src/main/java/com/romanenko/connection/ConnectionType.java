@@ -16,7 +16,7 @@ public enum ConnectionType {
     public static final String FOLLOW_NAME = "follow";
     public static final String BLACKLIST_NAME = "blacklist";
     public static final String FRIEND_NAME = "friend";
-    private final String name;
+    public final String name;
     private final int numberRepresentation;
 
     public static ConnectionType forName(String name) {
