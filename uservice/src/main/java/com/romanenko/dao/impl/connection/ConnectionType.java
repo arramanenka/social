@@ -31,7 +31,6 @@ public enum ConnectionType {
         return NONE;
     }
 
-    // TODO add tests
     public ConnectionType combine(ConnectionType incomingConnection) {
         //quick check for blacklist
         if (incomingConnection.numberRepresentation * this.numberRepresentation == 0) {
