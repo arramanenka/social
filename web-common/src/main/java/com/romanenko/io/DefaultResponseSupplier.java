@@ -77,7 +77,7 @@ public class DefaultResponseSupplier implements ResponseSupplier {
             HttpStatusCodeException exception = (HttpStatusCodeException) e;
             return ServerResponse.status(exception.getStatusCode())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(exception.getResponseBodyAsString());
+                    .bodyValue(createResponseMessage(exception.getStatusText()));
         } else if (e instanceof ServerWebInputException) {
             ServerWebInputException exception = (ServerWebInputException) e;
             return ServerResponse.status(exception.getStatus())
