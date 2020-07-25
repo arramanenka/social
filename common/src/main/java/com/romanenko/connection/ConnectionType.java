@@ -20,9 +20,6 @@ public enum ConnectionType {
     private final int numberRepresentation;
 
     public static ConnectionType forName(String name) {
-        if (name == null) {
-            return NONE;
-        }
         for (ConnectionType value : ConnectionType.values()) {
             if (value.name.equals(name)) {
                 return value;
@@ -36,7 +33,7 @@ public enum ConnectionType {
         if (incomingConnection.numberRepresentation * this.numberRepresentation == 0) {
             return ConnectionType.BLACKLIST;
         }
-        if (this.equals(FOLLOW) && incomingConnection.numberRepresentation >= FOLLOW.numberRepresentation){
+        if (this.equals(FOLLOW) && incomingConnection.numberRepresentation >= FOLLOW.numberRepresentation) {
             return FRIEND;
         }
         //otherwise nothing changes

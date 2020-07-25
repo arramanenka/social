@@ -23,7 +23,12 @@ public class RedisUserConnectionCache implements UserConnectionCache {
     @Override
     public Mono<ConnectionType> getCachedConnectionType(String initiatorId, String otherPersonId) {
         return connections.get(toKey(initiatorId, otherPersonId))
-                .map(ConnectionType::forName);
+                .flatMap(name -> {
+                    if (name == null) {
+                        return Mono.empty();
+                    }
+                    return Mono.just(ConnectionType.forName(name));
+                });
     }
 
     @Override
