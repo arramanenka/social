@@ -21,7 +21,7 @@
 
     <modules>
         <module>uservice</module>
-        <module>common</module>
+        <module>web-common</module>
     </modules>
 
     <dependencies>
