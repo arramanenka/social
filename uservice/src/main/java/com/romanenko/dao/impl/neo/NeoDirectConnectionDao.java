@@ -3,7 +3,9 @@ package com.romanenko.dao.impl.neo;
 import com.romanenko.dao.DirectConnectionDao;
 import com.romanenko.dao.impl.connection.ConnectionType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -26,5 +28,10 @@ public class NeoDirectConnectionDao implements DirectConnectionDao {
                             .map(e::combine)
                             .switchIfEmpty(Mono.just(ConnectionType.NONE));
                 });
+    }
+
+    @Override
+    public Mono<Void> recalculateRelations(String initiatorId, String otherPersonId, ConnectionType connection) {
+        return Mono.error(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "not implemented"));
     }
 }

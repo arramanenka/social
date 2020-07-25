@@ -37,7 +37,7 @@ public enum ConnectionType {
         if (incomingConnection.numberRepresentation * this.numberRepresentation == 0) {
             return ConnectionType.BLACKLIST;
         }
-        if (incomingConnection.equals(this) && incomingConnection.equals(FOLLOW)) {
+        if (this.equals(FOLLOW) && incomingConnection.numberRepresentation >= FOLLOW.numberRepresentation){
             return FRIEND;
         }
         //otherwise nothing changes
