@@ -20,9 +20,15 @@ public interface NeoUserRepo extends ReactiveNeo4jRepository<NeoUser, String> {
     Flux<NeoUser> getAllByNickBeginning(String id, String nickStart);
 
     @Query("match (queryingPerson: " + PRIMARY_LABEL + " {" + ID_LABEL + ": $0}) with queryingPerson\n" +
-            "match (person:" + PRIMARY_LABEL + " {" + ID_LABEL + ": $1}) where (person)-[:" + BLACKLIST_NAME + "*]-(queryingPerson)\n" +
-            "return person")
-    Mono<NeoUser> findUserById(String queryingId, String id);
+            "match (person: " + PRIMARY_LABEL + "{" + ID_LABEL + ": $1})\n" +
+            "where not (person)-[:" + CONNECTION_NAME + "{" + CONNECTION_TYPE_LABEL + ": '" + BLACKLIST_NAME + "'}]-(queryingPerson)\n" +
+            "with {\n" +
+            AS_NESTED_LABEL + ": person,\n" +
+            FOLLOWER_AMOUNT_LABEL + ": size((person)-[:" + CONNECTION_NAME + "{" + CONNECTION_TYPE_LABEL + ": '" + FOLLOW_NAME + "'}]->()),\n" +
+            FOLLOWING_AMOUNT_LABEL + ": size((person)<-[:" + CONNECTION_NAME + "{" + CONNECTION_TYPE_LABEL + ": '" + FOLLOW_NAME + "'}]-())\n" +
+            "} as personAcc\n" +
+            "return  personAcc")
+    Mono<MapValue> findUserById(String queryingId, String id);
 
     @Query("match (person: " + PRIMARY_LABEL + "{" + ID_LABEL + ": $0})\n" +
             "with {\n" +
