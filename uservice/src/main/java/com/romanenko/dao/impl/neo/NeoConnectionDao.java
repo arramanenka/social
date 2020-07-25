@@ -1,8 +1,8 @@
 package com.romanenko.dao.impl.neo;
 
+import com.romanenko.connection.ConnectionType;
 import com.romanenko.dao.ConnectionDao;
 import com.romanenko.dao.DirectConnectionDao;
-import com.romanenko.connection.ConnectionType;
 import com.romanenko.model.User;
 import com.romanenko.security.Identity;
 import lombok.RequiredArgsConstructor;
@@ -24,12 +24,14 @@ public class NeoConnectionDao implements ConnectionDao {
     public Flux<User> getFollowersOfUser(Identity initiator, String id) {
         String initiatorId = initiator.getId();
         if (initiatorId.equals(id)) {
-            return connectionRepo.getFollowers(initiatorId);
+            return connectionRepo.getFollowers(initiatorId)
+                    .map(NeoUser::toModel);
         }
         return directConnectionDao.getRelations(initiatorId, id)
                 .flatMapMany(connectionType -> {
                     if (!connectionType.equals(ConnectionType.BLACKLIST)) {
-                        return connectionRepo.getFollowers(id);
+                        return connectionRepo.getFollowers(id)
+                                .map(NeoUser::toModel);
                     }
                     return Mono.error(new HttpClientErrorException(HttpStatus.FORBIDDEN));
                 });
@@ -39,12 +41,14 @@ public class NeoConnectionDao implements ConnectionDao {
     public Flux<User> getFollowedByUser(Identity initiator, String id) {
         String initiatorId = initiator.getId();
         if (initiatorId.equals(id)) {
-            return connectionRepo.getFollowing(initiatorId);
+            return connectionRepo.getFollowing(initiatorId)
+                    .map(NeoUser::toModel);
         }
         return directConnectionDao.getRelations(initiatorId, id)
                 .flatMapMany(connectionType -> {
                     if (!connectionType.equals(ConnectionType.BLACKLIST)) {
-                        return connectionRepo.getFollowing(id);
+                        return connectionRepo.getFollowing(id)
+                                .map(NeoUser::toModel);
                     }
                     return Mono.error(new HttpClientErrorException(HttpStatus.FORBIDDEN));
                 });
@@ -74,7 +78,8 @@ public class NeoConnectionDao implements ConnectionDao {
 
     @Override
     public Flux<User> getBlacklist(Identity identity) {
-        return connectionRepo.getBlacklist(identity.getId());
+        return connectionRepo.getBlacklist(identity.getId())
+                .map(NeoUser::toModel);
     }
 
     @Override

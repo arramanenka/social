@@ -33,6 +33,12 @@ public class NeoUserDao implements UserDao {
 
     @Override
     public Mono<User> getUserById(Identity queryingIdentity, String id) {
-        return userRepo.findUserById(queryingIdentity.getId(), id);
+        String queryingUserId = queryingIdentity.getId();
+        if (queryingUserId.equals(id)){
+            return userRepo.findSelf(id)
+                    .map(NeoUser::toModel);
+        }
+        return userRepo.findUserById(queryingUserId, id)
+                .map(NeoUser::toModel);
     }
 }

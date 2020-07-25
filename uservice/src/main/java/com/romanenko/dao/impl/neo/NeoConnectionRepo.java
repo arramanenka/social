@@ -40,17 +40,17 @@ public interface NeoConnectionRepo extends ReactiveNeo4jRepository<NeoUser, Stri
     @Query("match (initiator: " + PRIMARY_LABEL + " {" + ID_LABEL + ": $0}) with initiator\n" +
             "match (initiator)-[:" + CONNECTION_NAME + "{" + CONNECTION_TYPE_LABEL + ": \"" + BLACKLIST_NAME + "\"}]->(blacklisted:" + PRIMARY_LABEL + ")\n" +
             "return blacklisted")
-    Flux<User> getBlacklist(String id);
+    Flux<NeoUser> getBlacklist(String id);
 
     @Query("match (initiator: " + PRIMARY_LABEL + " {" + ID_LABEL + ": $0}) with initiator\n" +
             "match (initiator)<-[:" + CONNECTION_NAME + "{" + CONNECTION_TYPE_LABEL + ": \"" + FOLLOW_NAME + "\"}]-(follower:" + PRIMARY_LABEL + ")\n" +
             "return follower")
-    Flux<User> getFollowers(String id);
+    Flux<NeoUser> getFollowers(String id);
 
     @Query("match (initiator: " + PRIMARY_LABEL + " {" + ID_LABEL + ": $0}) with initiator\n" +
             "match (initiator)-[:" + CONNECTION_NAME + "{" + CONNECTION_TYPE_LABEL + ": \"" + FOLLOW_NAME + "\"}]->(following:" + PRIMARY_LABEL + ")\n" +
             "return following")
-    Flux<User> getFollowing(String id);
+    Flux<NeoUser> getFollowing(String id);
 
     @Query("match (initiator: " + PRIMARY_LABEL + " {" + ID_LABEL + ": $0}) with initiator\n" +
             "match (followee: " + PRIMARY_LABEL + " {" + ID_LABEL + ": $1}) with followee, initiator\n" +
