@@ -1,13 +1,13 @@
 package com.romanenko.dao.impl.neo;
 
-import com.romanenko.model.User;
+import com.romanenko.dao.impl.neo.model.NeoUser;
 import org.neo4j.springframework.data.repository.ReactiveNeo4jRepository;
 import org.neo4j.springframework.data.repository.query.Query;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static com.romanenko.connection.ConnectionType.*;
-import static com.romanenko.dao.impl.neo.NeoUser.*;
+import static com.romanenko.dao.impl.neo.model.NeoUser.*;
 
 public interface NeoConnectionRepo extends ReactiveNeo4jRepository<NeoUser, String> {
 

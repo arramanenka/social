@@ -1,8 +1,9 @@
 package com.romanenko.dao.impl.neo;
 
 import com.romanenko.dao.UserDao;
-import com.romanenko.security.Identity;
+import com.romanenko.dao.impl.neo.model.NeoUser;
 import com.romanenko.model.User;
+import com.romanenko.security.Identity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
@@ -17,7 +18,7 @@ public class NeoUserDao implements UserDao {
     @Override
     public Mono<User> saveUser(User user) {
         return userRepo.save(new NeoUser(user))
-                .map(NeoUser::toSimpleModel);
+                .map(NeoUser::toFullProfileModel);
     }
 
     @Override
@@ -34,11 +35,11 @@ public class NeoUserDao implements UserDao {
     @Override
     public Mono<User> getUserById(Identity queryingIdentity, String id) {
         String queryingUserId = queryingIdentity.getId();
-        if (queryingUserId.equals(id)){
+        if (queryingUserId.equals(id)) {
             return userRepo.findSelf(id)
-                    .map(NeoUser::toSimpleModel);
+                    .map(NeoUser::toFullProfileModel);
         }
         return userRepo.findUserById(queryingUserId, id)
-                .map(NeoUser::toSimpleModel);
+                .map(NeoUser::toFullProfileModel);
     }
 }
