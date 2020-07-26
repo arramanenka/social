@@ -20,8 +20,9 @@ class MessageHandler(
         private val identityProvider: IdentityProvider
 ) : Routable {
     override fun declareRoute(builder: ApiBuilder) {
-        builder.post("/message/{userId}", ::postMessage)
-                .delete("/message/{userId}/{messageId}", ::deleteMessage)
+        builder
+                .post("/message/{chatId}", ::postMessage)
+                .delete("/message/{chatId}/{messageId}", ::deleteMessage)
                 .get("/messages/{userId}", ::getMessages)
     }
 
@@ -30,10 +31,9 @@ class MessageHandler(
                 .flatMap { identity ->
                     request.bodyToMono(Message::class.java)
                             .switchIfEmpty(Mono.error<Message>(HttpClientErrorException(HttpStatus.BAD_REQUEST, "Empty message")))
-                            .doOnNext { message ->
-                                println(message)
+                            .doOnSuccess { message ->
                                 message.senderId = identity.id
-                                message.receiverId = request.pathVariable("userId")
+                                message.chatId = request.pathVariable("chatId")
                             }
                 }.flatMap { message ->
                     if (message.message?.isBlank() != false) {
