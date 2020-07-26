@@ -24,6 +24,7 @@
         <module>web-common</module>
         <module>common</module>
         <module>cache</module>
+        <module>messaging</module>
     </modules>
 
     <dependencies>

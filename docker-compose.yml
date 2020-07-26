@@ -16,3 +16,10 @@ services:
     environment:
       - REDIS_REPLICATION_MODE=master
     restart: on-failure
+  mongodb:
+    image: mongo:latest
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongo
+      - MONGO_INITDB_ROOT_PASSWORD=pnumbah
+    ports:
+      - 27017:27017
