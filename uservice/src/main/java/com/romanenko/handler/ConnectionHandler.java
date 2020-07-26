@@ -1,12 +1,14 @@
 package com.romanenko.handler;
 
+import com.romanenko.dao.ConnectionDao;
+import com.romanenko.io.PageQuery;
 import com.romanenko.io.ResponseSupplier;
+import com.romanenko.model.User;
 import com.romanenko.routing.ApiBuilder;
 import com.romanenko.routing.Routable;
 import com.romanenko.security.IdentityProvider;
-import com.romanenko.dao.ConnectionDao;
-import com.romanenko.model.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -33,20 +35,23 @@ public class ConnectionHandler implements Routable {
                 .delete("/blacklist/{id}", this::removeFromBlacklist);
     }
 
+    @NonNull
     private Mono<ServerResponse> getAllFollowers(ServerRequest request) {
         String id = request.pathVariable("id");
         Flux<User> users = identityProvider.getIdentity(request)
-                .flatMapMany(identity -> connectionDao.getFollowersOfUser(identity, id));
+                .flatMapMany(identity -> connectionDao.getFollowersOfUser(identity, id, new PageQuery(request)));
         return responseSupplier.questionable_ok(users, User.class);
     }
 
+    @NonNull
     private Mono<ServerResponse> getALlFollowing(ServerRequest request) {
         String id = request.pathVariable("id");
         Flux<User> users = identityProvider.getIdentity(request)
-                .flatMapMany(identity -> connectionDao.getFollowedByUser(identity, id));
+                .flatMapMany(identity -> connectionDao.getFollowedByUser(identity, id, new PageQuery(request)));
         return responseSupplier.questionable_ok(users, User.class);
     }
 
+    @NonNull
     private Mono<ServerResponse> addFollower(ServerRequest request) {
         String followingId = request.pathVariable("id");
         Mono<Void> result = identityProvider.getIdentity(request)
@@ -54,6 +59,7 @@ public class ConnectionHandler implements Routable {
         return responseSupplier.questionable_ok(result, Void.class);
     }
 
+    @NonNull
     private Mono<ServerResponse> removeFollower(ServerRequest request) {
         String followingId = request.pathVariable("id");
         Mono<Void> result = identityProvider.getIdentity(request)
@@ -61,12 +67,14 @@ public class ConnectionHandler implements Routable {
         return responseSupplier.questionable_ok(result, Void.class);
     }
 
+    @NonNull
     private Mono<ServerResponse> getAllBlacklisted(ServerRequest request) {
         Flux<User> users = identityProvider.getIdentity(request)
-                .flatMapMany(connectionDao::getBlacklist);
+                .flatMapMany(identity -> connectionDao.getBlacklist(identity, new PageQuery(request)));
         return responseSupplier.questionable_ok(users, User.class);
     }
 
+    @NonNull
     private Mono<ServerResponse> addToBlacklist(ServerRequest request) {
         String blacklistedUser = request.pathVariable("id");
         Mono<Void> result = identityProvider.getIdentity(request)
@@ -74,6 +82,7 @@ public class ConnectionHandler implements Routable {
         return responseSupplier.questionable_ok(result, Void.class);
     }
 
+    @NonNull
     private Mono<ServerResponse> removeFromBlacklist(ServerRequest request) {
         String blacklistedUser = request.pathVariable("id");
         Mono<Void> result = identityProvider.getIdentity(request)

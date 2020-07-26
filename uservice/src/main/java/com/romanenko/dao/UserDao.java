@@ -1,7 +1,8 @@
 package com.romanenko.dao;
 
-import com.romanenko.security.Identity;
+import com.romanenko.io.PageQuery;
 import com.romanenko.model.User;
+import com.romanenko.security.Identity;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -12,5 +13,5 @@ public interface UserDao {
 
     Mono<User> getUserById(Identity queryingIdentity, String id);
 
-    Flux<User> getAllByNickBeginning(Identity queryingIdentity, String nickStart);
+    Flux<User> getAllByNickBeginning(Identity queryingIdentity, String nickStart, PageQuery pageQuery);
 }

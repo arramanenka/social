@@ -16,8 +16,10 @@ public interface NeoUserRepo extends ReactiveNeo4jRepository<NeoUser, String> {
     @Query("match (queryingPerson: " + PRIMARY_LABEL + " {" + ID_LABEL + ": $0}) with queryingPerson\n" +
             "match (person:" + PRIMARY_LABEL + ") where person." + NAME_LABEL +
             " starts with $1 AND not (person)-[:" + CONNECTION_NAME + "{" + CONNECTION_TYPE_LABEL + ": '" + BLACKLIST_NAME + "'}]-(queryingPerson)\n" +
-            "return person")
-    Flux<NeoUser> getAllByNickBeginning(String id, String nickStart);
+            "return person\n" +
+            "skip $2 " +
+            "limit $3")
+    Flux<NeoUser> getAllByNickBeginning(String id, String nickStart, int skipAmount, int amount);
 
     @Query("match (queryingPerson: " + PRIMARY_LABEL + " {" + ID_LABEL + ": $0}) with queryingPerson\n" +
             "match (person: " + PRIMARY_LABEL + "{" + ID_LABEL + ": $1})\n" +

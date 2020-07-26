@@ -1,12 +1,14 @@
 package com.romanenko.handler;
 
 import com.romanenko.dao.UserDao;
+import com.romanenko.io.PageQuery;
 import com.romanenko.io.ResponseSupplier;
+import com.romanenko.model.User;
 import com.romanenko.routing.ApiBuilder;
 import com.romanenko.routing.Routable;
 import com.romanenko.security.IdentityProvider;
-import com.romanenko.model.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -29,6 +31,7 @@ public class UserHandler implements Routable {
                 .delete("/user", this::deleteUser);
     }
 
+    @NonNull
     private Mono<ServerResponse> saveUser(ServerRequest request) {
         return identityProvider.getIdentity(request)
                 .flatMap(e -> request.bodyToMono(User.class).doOnSuccess(u -> u.setId(e.getId())))
@@ -38,6 +41,7 @@ public class UserHandler implements Routable {
                 .onErrorResume(responseSupplier::error);
     }
 
+    @NonNull
     private Mono<ServerResponse> deleteUser(ServerRequest request) {
         return identityProvider.getIdentity(request)
                 .flatMap(userDao::deleteById)
@@ -45,6 +49,7 @@ public class UserHandler implements Routable {
                 .onErrorResume(responseSupplier::error);
     }
 
+    @NonNull
     private Mono<ServerResponse> getUser(ServerRequest request) {
         String id = request.pathVariable("id");
         Mono<User> user = identityProvider.getIdentity(request)
@@ -52,10 +57,11 @@ public class UserHandler implements Routable {
         return responseSupplier.questionable_ok(user, User.class);
     }
 
+    @NonNull
     public Mono<ServerResponse> getAll(ServerRequest request) {
         String nickStart = request.pathVariable("nickStart");
         Flux<User> users = identityProvider.getIdentity(request)
-                .flatMapMany(identity -> userDao.getAllByNickBeginning(identity, nickStart));
+                .flatMapMany(identity -> userDao.getAllByNickBeginning(identity, nickStart, new PageQuery(request)));
         return responseSupplier.questionable_ok(users, User.class);
     }
 }

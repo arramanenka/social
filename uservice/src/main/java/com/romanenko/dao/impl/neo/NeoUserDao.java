@@ -2,6 +2,7 @@ package com.romanenko.dao.impl.neo;
 
 import com.romanenko.dao.UserDao;
 import com.romanenko.dao.impl.neo.model.NeoUser;
+import com.romanenko.io.PageQuery;
 import com.romanenko.model.User;
 import com.romanenko.security.Identity;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +28,8 @@ public class NeoUserDao implements UserDao {
     }
 
     @Override
-    public Flux<User> getAllByNickBeginning(Identity queryingIdentity, String nickStart) {
-        return userRepo.getAllByNickBeginning(queryingIdentity.getId(), nickStart)
+    public Flux<User> getAllByNickBeginning(Identity queryingIdentity, String nickStart, PageQuery pageQuery) {
+        return userRepo.getAllByNickBeginning(queryingIdentity.getId(), nickStart, pageQuery.calculateSkipAmount(), pageQuery.pageSize)
                 .map(NeoUser::toSimpleModel);
     }
 

@@ -7,7 +7,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static com.romanenko.connection.ConnectionType.*;
-import static com.romanenko.dao.impl.neo.model.NeoUser.*;
+import static com.romanenko.dao.impl.neo.model.NeoUser.ID_LABEL;
+import static com.romanenko.dao.impl.neo.model.NeoUser.PRIMARY_LABEL;
 
 public interface NeoConnectionRepo extends ReactiveNeo4jRepository<NeoUser, String> {
 
@@ -39,18 +40,24 @@ public interface NeoConnectionRepo extends ReactiveNeo4jRepository<NeoUser, Stri
 
     @Query("match (initiator: " + PRIMARY_LABEL + " {" + ID_LABEL + ": $0}) with initiator\n" +
             "match (initiator)-[:" + CONNECTION_NAME + "{" + CONNECTION_TYPE_LABEL + ": \"" + BLACKLIST_NAME + "\"}]->(blacklisted:" + PRIMARY_LABEL + ")\n" +
-            "return blacklisted")
-    Flux<NeoUser> getBlacklist(String id);
+            "return blacklisted\n" +
+            "skip $1 " +
+            "limit $2")
+    Flux<NeoUser> getBlacklist(String id, int skipAmount, int amount);
 
     @Query("match (initiator: " + PRIMARY_LABEL + " {" + ID_LABEL + ": $0}) with initiator\n" +
             "match (initiator)<-[:" + CONNECTION_NAME + "{" + CONNECTION_TYPE_LABEL + ": \"" + FOLLOW_NAME + "\"}]-(follower:" + PRIMARY_LABEL + ")\n" +
-            "return follower")
-    Flux<NeoUser> getFollowers(String id);
+            "return follower\n" +
+            "skip $1 " +
+            "limit $2")
+    Flux<NeoUser> getFollowers(String id, int skipAmount, int amount);
 
     @Query("match (initiator: " + PRIMARY_LABEL + " {" + ID_LABEL + ": $0}) with initiator\n" +
             "match (initiator)-[:" + CONNECTION_NAME + "{" + CONNECTION_TYPE_LABEL + ": \"" + FOLLOW_NAME + "\"}]->(following:" + PRIMARY_LABEL + ")\n" +
-            "return following")
-    Flux<NeoUser> getFollowing(String id);
+            "return following\n" +
+            "skip $1 " +
+            "limit $2")
+    Flux<NeoUser> getFollowing(String id, int skipAmount, int amount);
 
     @Query("match (initiator: " + PRIMARY_LABEL + " {" + ID_LABEL + ": $0}) with initiator\n" +
             "match (followee: " + PRIMARY_LABEL + " {" + ID_LABEL + ": $1}) with followee, initiator\n" +
