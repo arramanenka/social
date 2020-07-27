@@ -1,17 +1,25 @@
 package com.romanenko.dao.mongo
 
 import com.romanenko.dao.ChatDao
+import com.romanenko.dao.MessageDao
 import com.romanenko.model.Chat
 import com.romanenko.security.Identity
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
+import org.springframework.data.mongodb.core.query.Criteria.where
+import org.springframework.data.mongodb.core.query.Query.query
+import org.springframework.data.mongodb.core.query.Update
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.core.scheduler.Schedulers
 
 @Component
 class MongoChatDao(
-        private val chatRepo: ChatRepo
+        private val chatRepo: ChatRepo,
+        private val messageDao: MessageDao,
+        private val reactiveMongoTemplate: ReactiveMongoTemplate
 ) : ChatDao {
 
     override fun createChat(chat: Chat): Mono<Chat> {
@@ -19,23 +27,32 @@ class MongoChatDao(
     }
 
     override fun updateChat(chat: Chat): Mono<Chat> {
-        TODO("Not yet implemented")
+        val query = query(where(MongoChat.CHAT_ID_LABEL).`is`(chat.chatId).and(MongoChat.CREATOR_ID_LABEL).`is`(chat.creatorId))
+        val update = Update().set(MongoChat.NAME_LABEL, chat.name)
+        return reactiveMongoTemplate.findAndModify(query, update, MongoChat::class.java).map { it.toModel() }
     }
 
     override fun deleteChat(identity: Identity, chatId: Int): Mono<Void> {
         return chatRepo.deleteByChatIdAndCreatorId(chatId, identity.id)
+                .doOnSuccess {
+                    messageDao.deleteAllMessagesOfChat(identity, chatId).subscribeOn(Schedulers.parallel()).subscribe()
+                }
                 .switchIfEmpty(Mono.error<Void>(HttpClientErrorException(HttpStatus.NOT_FOUND)))
     }
 
     override fun addMember(identity: Identity, chatId: Int, userId: String): Mono<Void> {
-        TODO("Not yet implemented")
+        val query = query(where(MongoChat.CHAT_ID_LABEL).`is`(chatId).and(MongoChat.CREATOR_ID_LABEL).`is`(identity.id))
+        val update = Update().addToSet(MongoChat.MEMBERS_LABEL, userId)
+        return reactiveMongoTemplate.updateFirst(query, update, MongoChat::class.java).then()
     }
 
     override fun removeMember(identity: Identity, chatId: Int, userId: String): Mono<Void> {
-        TODO("Not yet implemented")
+        val query = query(where(MongoChat.CHAT_ID_LABEL).`is`(chatId).and(MongoChat.CREATOR_ID_LABEL).`is`(identity.id))
+        val update = Update().pull(MongoChat.MEMBERS_LABEL, userId)
+        return reactiveMongoTemplate.updateFirst(query, update, MongoChat::class.java).then()
     }
 
     override fun getOwnChats(identity: Identity): Flux<Chat> {
-        TODO("Not yet implemented")
+        return chatRepo.findAllByMembersContaining(identity.id).map { it.toModel() }
     }
 }

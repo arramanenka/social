@@ -9,4 +9,5 @@ interface MessageDao {
     fun saveMessage(message: Message): Mono<Message>
     fun deleteMessage(identity: Identity, chatId: Int, messageId: String): Mono<Message>
     fun getAllMessages(identity: Identity, chatId: Int): Flux<Message>
+    fun deleteAllMessagesOfChat(identity: Identity, chatId: Int): Mono<Void>
 }
