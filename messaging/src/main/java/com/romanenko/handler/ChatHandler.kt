@@ -51,19 +51,36 @@ class ChatHandler(
         return responseSupplier.questionable_ok(result, Chat::class.java)
     }
 
-    private fun addMember(request: ServerRequest): Mono<ServerResponse> {
-        TODO("Not yet implemented")
-    }
-
-    private fun removeMember(request: ServerRequest): Mono<ServerResponse> {
-        TODO("Not yet implemented")
-    }
-
     private fun deleteChat(request: ServerRequest): Mono<ServerResponse> {
-        TODO("Not yet implemented")
+        val result = identityProvider.getIdentity(request)
+                .flatMap {
+                    return@flatMap chatDao.deleteChat(it, request.pathVariable("chatId"))
+                }
+        return responseSupplier.questionable_ok(result, Void::class.java)
     }
 
     private fun getOwnChats(request: ServerRequest): Mono<ServerResponse> {
-        TODO("Not yet implemented")
+        val result = identityProvider.getIdentity(request)
+                .flatMapMany {
+                    return@flatMapMany chatDao.getOwnChats(it)
+                }
+        return responseSupplier.questionable_ok(result, Chat::class.java)
     }
+
+    private fun addMember(request: ServerRequest): Mono<ServerResponse> {
+        val result = identityProvider.getIdentity(request)
+                .flatMap {
+                    chatDao.addMember(it, request.pathVariable("chatId"), request.pathVariable("userId"))
+                }
+        return responseSupplier.questionable_ok(result, Void::class.java)
+    }
+
+    private fun removeMember(request: ServerRequest): Mono<ServerResponse> {
+        val result = identityProvider.getIdentity(request)
+                .flatMap {
+                    chatDao.removeMember(it, request.pathVariable("chatId"), request.pathVariable("userId"))
+                }
+        return responseSupplier.questionable_ok(result, Void::class.java)
+    }
+
 }
