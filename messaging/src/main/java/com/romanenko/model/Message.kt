@@ -7,5 +7,5 @@ data class Message(
         var senderId: String? = null,
         var message: String? = null,
         var messageId: String? = null,
-        var chatId: String? = null
+        var chatId: Int? = null
 )

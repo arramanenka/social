@@ -7,6 +7,6 @@ import reactor.core.publisher.Mono
 
 interface MessageDao {
     fun saveMessage(message: Message): Mono<Message>
-    fun deleteMessage(identity: Identity, chatId: String, messageId: String): Mono<Message>
-    fun getAllMessages(identity: Identity, chatId: String): Flux<Message>
+    fun deleteMessage(identity: Identity, chatId: Int, messageId: String): Mono<Message>
+    fun getAllMessages(identity: Identity, chatId: Int): Flux<Message>
 }

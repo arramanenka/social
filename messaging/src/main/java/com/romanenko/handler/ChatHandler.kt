@@ -40,7 +40,7 @@ class ChatHandler(
                             .switchIfEmpty(Mono.error<Chat>(HttpClientErrorException(HttpStatus.BAD_REQUEST, "Empty chat")))
                             .doOnSuccess { it.creatorId = identity.id }
                 }.flatMap {
-                    if (it.chatId.isNullOrBlank()) {
+                    if (it.chatId == null) {
                         if (it.type == null || it.type!! == ChatType.NOT_SPECIFIED) {
                             return@flatMap Mono.error<Chat>(HttpClientErrorException(HttpStatus.BAD_REQUEST, "Chat type is not specified"))
                         }
@@ -54,7 +54,7 @@ class ChatHandler(
     private fun deleteChat(request: ServerRequest): Mono<ServerResponse> {
         val result = identityProvider.getIdentity(request)
                 .flatMap {
-                    return@flatMap chatDao.deleteChat(it, request.pathVariable("chatId"))
+                    return@flatMap chatDao.deleteChat(it, request.pathVariable("chatId").toInt())
                 }
         return responseSupplier.questionable_ok(result, Void::class.java)
     }
@@ -70,7 +70,7 @@ class ChatHandler(
     private fun addMember(request: ServerRequest): Mono<ServerResponse> {
         val result = identityProvider.getIdentity(request)
                 .flatMap {
-                    chatDao.addMember(it, request.pathVariable("chatId"), request.pathVariable("userId"))
+                    chatDao.addMember(it, request.pathVariable("chatId").toInt(), request.pathVariable("userId"))
                 }
         return responseSupplier.questionable_ok(result, Void::class.java)
     }
@@ -78,7 +78,7 @@ class ChatHandler(
     private fun removeMember(request: ServerRequest): Mono<ServerResponse> {
         val result = identityProvider.getIdentity(request)
                 .flatMap {
-                    chatDao.removeMember(it, request.pathVariable("chatId"), request.pathVariable("userId"))
+                    chatDao.removeMember(it, request.pathVariable("chatId").toInt(), request.pathVariable("userId"))
                 }
         return responseSupplier.questionable_ok(result, Void::class.java)
     }
