@@ -6,7 +6,9 @@ import com.romanenko.io.PageQuery;
 import com.romanenko.model.User;
 import com.romanenko.security.Identity;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -41,6 +43,7 @@ public class NeoUserDao implements UserDao {
                     .map(NeoUser::convertFullProfile);
         }
         return userRepo.findUserById(queryingUserId, id)
-                .map(NeoUser::convertFullProfile);
+                .map(NeoUser::convertFullProfile)
+                .switchIfEmpty(Mono.error(new HttpClientErrorException(HttpStatus.NOT_FOUND)));
     }
 }
