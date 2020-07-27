@@ -23,7 +23,7 @@ class MessageHandler(
         builder
                 .post("/message/{chatId}", ::postMessage)
                 .delete("/message/{chatId}/{messageId}", ::deleteMessage)
-                .get("/messages/{userId}", ::getMessages)
+                .get("/messages/{chatId}", ::getMessages)
     }
 
     private fun postMessage(request: ServerRequest): Mono<ServerResponse> {
@@ -45,10 +45,17 @@ class MessageHandler(
     }
 
     private fun deleteMessage(request: ServerRequest): Mono<ServerResponse> {
-        TODO("Not yet implemented")
+        val result = identityProvider.getIdentity(request)
+                .flatMap {
+                    messageDao.deleteMessage(it, request.pathVariable("chatId"), request.pathVariable("messageId"))
+                }
+        return responseSupplier.questionable_ok(result, Message::class.java)
     }
 
     private fun getMessages(request: ServerRequest): Mono<ServerResponse> {
-        TODO("Not yet implemented")
+        val messages = identityProvider.getIdentity(request).flatMapMany {
+            messageDao.getAllMessages(it, request.pathVariable("chatId"))
+        }
+        return responseSupplier.questionable_ok(messages, Message::class.java)
     }
 }
