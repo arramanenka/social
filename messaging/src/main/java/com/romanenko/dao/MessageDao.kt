@@ -7,7 +7,11 @@ import reactor.core.publisher.Mono
 
 interface MessageDao {
     fun saveMessage(message: Message): Mono<Message>
-    fun deleteMessage(identity: Identity, chatId: Int, messageId: String): Mono<Message>
+    fun deleteMessage(identity: Identity, chatId: Int, messageId: Int): Mono<Message>
     fun getAllMessages(identity: Identity, chatId: Int): Flux<Message>
-    fun deleteAllMessagesOfChat(identity: Identity, chatId: Int): Mono<Void>
+
+    /**
+     * Delete all messages linked to a chat without checking of querying person
+     */
+    fun deleteAllMessagesOfChat(chatId: Int): Mono<Void>
 }

@@ -36,7 +36,7 @@ class MessageHandler(
                                 message.chatId = request.pathVariable("chatId").toInt()
                             }
                 }.flatMap { message ->
-                    if (message.message?.isBlank() != false) {
+                    if (message.text?.isBlank() != false) {
                         return@flatMap Mono.error<Message>(HttpClientErrorException(HttpStatus.BAD_REQUEST, "Message is blank"))
                     }
                     Mono.just(message)
@@ -47,7 +47,7 @@ class MessageHandler(
     private fun deleteMessage(request: ServerRequest): Mono<ServerResponse> {
         val result = identityProvider.getIdentity(request)
                 .flatMap {
-                    messageDao.deleteMessage(it, request.pathVariable("chatId").toInt(), request.pathVariable("messageId"))
+                    messageDao.deleteMessage(it, request.pathVariable("chatId").toInt(), request.pathVariable("messageId").toInt())
                 }
         return responseSupplier.questionable_ok(result, Message::class.java)
     }

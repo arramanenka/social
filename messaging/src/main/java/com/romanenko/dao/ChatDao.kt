@@ -6,6 +6,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 interface ChatDao {
+    fun findChat(userId: String, chatId: Int): Mono<Chat>
     fun createChat(chat: Chat): Mono<Chat>
     fun updateChat(chat: Chat): Mono<Chat>
     fun deleteChat(identity: Identity, chatId: Int): Mono<Void>

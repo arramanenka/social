@@ -21,9 +21,7 @@ data class MongoChat(
 ) {
     constructor(chat: Chat) : this(chat.chatId, chat.creatorId, chat.name, chat.members, chat.type)
 
-    fun toModel(): Chat {
-        return Chat(chatId, creatorId, name, members, type)
-    }
+    fun toModel(): Chat = Chat(chatId, creatorId, name, members, type)
 
     companion object MongoChatFields {
         const val MEMBERS_LABEL = "members"

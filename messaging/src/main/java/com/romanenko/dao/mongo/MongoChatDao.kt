@@ -22,6 +22,10 @@ class MongoChatDao(
         private val reactiveMongoTemplate: ReactiveMongoTemplate
 ) : ChatDao {
 
+    override fun findChat(userId: String, chatId: Int): Mono<Chat> {
+        return chatRepo.findByChatIdAndCreatorIdOrMembersContaining(chatId, userId, userId).map { it.toModel() }
+    }
+
     override fun createChat(chat: Chat): Mono<Chat> {
         return chatRepo.save(MongoChat(chat)).map { it.toModel() }
     }
@@ -35,7 +39,7 @@ class MongoChatDao(
     override fun deleteChat(identity: Identity, chatId: Int): Mono<Void> {
         return chatRepo.deleteByChatIdAndCreatorId(chatId, identity.id)
                 .doOnSuccess {
-                    messageDao.deleteAllMessagesOfChat(identity, chatId).subscribeOn(Schedulers.parallel()).subscribe()
+                    messageDao.deleteAllMessagesOfChat(chatId).subscribeOn(Schedulers.parallel()).subscribe()
                 }
                 .switchIfEmpty(Mono.error<Void>(HttpClientErrorException(HttpStatus.NOT_FOUND)))
     }
