@@ -56,6 +56,6 @@ class MongoChatDao(
     }
 
     override fun getOwnChats(identity: Identity): Flux<Chat> {
-        return chatRepo.findAllByMembersContaining(identity.id).map { it.toModel() }
+        return chatRepo.findAllByMembersContainingOrCreatorId(identity.id, identity.id).map { it.toModel() }
     }
 }

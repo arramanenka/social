@@ -54,33 +54,25 @@ class ChatHandler(
 
     private fun deleteChat(request: ServerRequest): Mono<ServerResponse> {
         val result = identityProvider.getIdentity(request)
-                .flatMap {
-                    return@flatMap chatDao.deleteChat(it, request.pathVariable("chatId"))
-                }
+                .flatMap { chatDao.deleteChat(it, request.pathVariable("chatId")) }
         return responseSupplier.ok(result, Void::class.java)
     }
 
     private fun getOwnChats(request: ServerRequest): Mono<ServerResponse> {
         val result = identityProvider.getIdentity(request)
-                .flatMapMany {
-                    return@flatMapMany chatDao.getOwnChats(it)
-                }
+                .flatMapMany { chatDao.getOwnChats(it) }
         return responseSupplier.ok(result, Chat::class.java)
     }
 
     private fun addMember(request: ServerRequest): Mono<ServerResponse> {
         val result = identityProvider.getIdentity(request)
-                .flatMap {
-                    chatDao.addMember(it, request.pathVariable("chatId"), request.pathVariable("userId"))
-                }
+                .flatMap { chatDao.addMember(it, request.pathVariable("chatId"), request.pathVariable("userId")) }
         return responseSupplier.ok(result, Void::class.java)
     }
 
     private fun removeMember(request: ServerRequest): Mono<ServerResponse> {
         val result = identityProvider.getIdentity(request)
-                .flatMap {
-                    chatDao.removeMember(it, request.pathVariable("chatId"), request.pathVariable("userId"))
-                }
+                .flatMap { chatDao.removeMember(it, request.pathVariable("chatId"), request.pathVariable("userId")) }
         return responseSupplier.ok(result, Void::class.java)
     }
 

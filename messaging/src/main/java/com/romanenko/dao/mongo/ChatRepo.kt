@@ -6,7 +6,7 @@ import reactor.core.publisher.Mono
 
 interface ChatRepo : ReactiveMongoRepository<MongoChat, String> {
     fun deleteByChatIdAndCreatorId(chatId: String, creatorId: String): Mono<Void>
-    fun findAllByMembersContaining(memberId: String): Flux<MongoChat>
+    fun findAllByMembersContainingOrCreatorId(memberId: String, creatorId: String): Flux<MongoChat>
 
     //todo change up to not repeat argument
     fun findByChatIdAndCreatorIdOrMembersContaining(chatId: String, queryingPerson: String, memberId: String): Mono<MongoChat>
