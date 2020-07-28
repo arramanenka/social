@@ -40,7 +40,7 @@ public class ConnectionHandler implements Routable {
         String id = request.pathVariable("id");
         Flux<User> users = identityProvider.getIdentity(request)
                 .flatMapMany(identity -> connectionDao.getFollowersOfUser(identity, id, new PageQuery(request)));
-        return responseSupplier.questionable_ok(users, User.class);
+        return responseSupplier.ok(users, User.class);
     }
 
     @NonNull
@@ -48,7 +48,7 @@ public class ConnectionHandler implements Routable {
         String id = request.pathVariable("id");
         Flux<User> users = identityProvider.getIdentity(request)
                 .flatMapMany(identity -> connectionDao.getFollowedByUser(identity, id, new PageQuery(request)));
-        return responseSupplier.questionable_ok(users, User.class);
+        return responseSupplier.ok(users, User.class);
     }
 
     @NonNull
@@ -56,7 +56,7 @@ public class ConnectionHandler implements Routable {
         String followingId = request.pathVariable("id");
         Mono<Void> result = identityProvider.getIdentity(request)
                 .flatMap(id -> connectionDao.addFollower(id, followingId));
-        return responseSupplier.questionable_ok(result, Void.class);
+        return responseSupplier.ok(result, Void.class);
     }
 
     @NonNull
@@ -64,14 +64,14 @@ public class ConnectionHandler implements Routable {
         String followingId = request.pathVariable("id");
         Mono<Void> result = identityProvider.getIdentity(request)
                 .flatMap(id -> connectionDao.removeFollower(id, followingId));
-        return responseSupplier.questionable_ok(result, Void.class);
+        return responseSupplier.ok(result, Void.class);
     }
 
     @NonNull
     private Mono<ServerResponse> getAllBlacklisted(ServerRequest request) {
         Flux<User> users = identityProvider.getIdentity(request)
                 .flatMapMany(identity -> connectionDao.getBlacklist(identity, new PageQuery(request)));
-        return responseSupplier.questionable_ok(users, User.class);
+        return responseSupplier.ok(users, User.class);
     }
 
     @NonNull
@@ -79,7 +79,7 @@ public class ConnectionHandler implements Routable {
         String blacklistedUser = request.pathVariable("id");
         Mono<Void> result = identityProvider.getIdentity(request)
                 .flatMap(id -> connectionDao.blacklist(id, blacklistedUser));
-        return responseSupplier.questionable_ok(result, Void.class);
+        return responseSupplier.ok(result, Void.class);
     }
 
     @NonNull
@@ -87,6 +87,6 @@ public class ConnectionHandler implements Routable {
         String blacklistedUser = request.pathVariable("id");
         Mono<Void> result = identityProvider.getIdentity(request)
                 .flatMap(id -> connectionDao.removeFromBlacklist(id, blacklistedUser));
-        return responseSupplier.questionable_ok(result, Void.class);
+        return responseSupplier.ok(result, Void.class);
     }
 }

@@ -54,7 +54,7 @@ public class UserHandler implements Routable {
         String id = request.pathVariable("id");
         Mono<User> user = identityProvider.getIdentity(request)
                 .flatMap(identity -> userDao.getUserById(identity, id));
-        return responseSupplier.questionable_ok(user, User.class);
+        return responseSupplier.ok(user, User.class);
     }
 
     @NonNull
@@ -62,6 +62,6 @@ public class UserHandler implements Routable {
         String nickStart = request.pathVariable("nickStart");
         Flux<User> users = identityProvider.getIdentity(request)
                 .flatMapMany(identity -> userDao.getAllByNickBeginning(identity, nickStart, new PageQuery(request)));
-        return responseSupplier.questionable_ok(users, User.class);
+        return responseSupplier.ok(users, User.class);
     }
 }

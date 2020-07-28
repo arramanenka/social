@@ -47,7 +47,7 @@ class ChatHandler(
                     }
                     return@flatMap chatDao.updateChat(it)
                 }
-        return responseSupplier.questionable_ok(result, Chat::class.java)
+        return responseSupplier.ok(result, Chat::class.java)
     }
 
     private fun deleteChat(request: ServerRequest): Mono<ServerResponse> {
@@ -55,7 +55,7 @@ class ChatHandler(
                 .flatMap {
                     return@flatMap chatDao.deleteChat(it, request.pathVariable("chatId"))
                 }
-        return responseSupplier.questionable_ok(result, Void::class.java)
+        return responseSupplier.ok(result, Void::class.java)
     }
 
     private fun getOwnChats(request: ServerRequest): Mono<ServerResponse> {
@@ -63,7 +63,7 @@ class ChatHandler(
                 .flatMapMany {
                     return@flatMapMany chatDao.getOwnChats(it)
                 }
-        return responseSupplier.questionable_ok(result, Chat::class.java)
+        return responseSupplier.ok(result, Chat::class.java)
     }
 
     private fun addMember(request: ServerRequest): Mono<ServerResponse> {
@@ -71,7 +71,7 @@ class ChatHandler(
                 .flatMap {
                     chatDao.addMember(it, request.pathVariable("chatId"), request.pathVariable("userId"))
                 }
-        return responseSupplier.questionable_ok(result, Void::class.java)
+        return responseSupplier.ok(result, Void::class.java)
     }
 
     private fun removeMember(request: ServerRequest): Mono<ServerResponse> {
@@ -79,7 +79,7 @@ class ChatHandler(
                 .flatMap {
                     chatDao.removeMember(it, request.pathVariable("chatId"), request.pathVariable("userId"))
                 }
-        return responseSupplier.questionable_ok(result, Void::class.java)
+        return responseSupplier.ok(result, Void::class.java)
     }
 
 }

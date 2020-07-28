@@ -45,20 +45,6 @@ public class DefaultResponseSupplier implements ResponseSupplier {
     }
 
     @Override
-    public <T> Mono<ServerResponse> questionable_ok(Mono<T> object, Class<T> clazz) {
-        return object.cache().hasElement()
-                .flatMap(hasElement -> hasElement ? ok(object, clazz) : noContent())
-                .onErrorResume(this::error);
-    }
-
-    @Override
-    public <T> Mono<ServerResponse> questionable_ok(Flux<T> flux, Class<T> clazz) {
-        return flux.cache().hasElements()
-                .flatMap(hasElements -> hasElements ? ok(flux, clazz) : noContent())
-                .onErrorResume(this::error);
-    }
-
-    @Override
     public Mono<ServerResponse> badRequest(String message, Exception e) {
         log.error(e);
         return badRequest(message);

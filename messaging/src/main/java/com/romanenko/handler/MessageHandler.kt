@@ -41,7 +41,7 @@ class MessageHandler(
                     }
                     Mono.just(message)
                 }.flatMap { message: Message -> messageDao.saveMessage(message) }
-        return responseSupplier.questionable_ok(result, Message::class.java)
+        return responseSupplier.ok(result, Message::class.java)
     }
 
     private fun deleteMessage(request: ServerRequest): Mono<ServerResponse> {
@@ -49,13 +49,13 @@ class MessageHandler(
                 .flatMap {
                     messageDao.deleteMessage(it, request.pathVariable("chatId"), request.pathVariable("messageId"))
                 }
-        return responseSupplier.questionable_ok(result, Message::class.java)
+        return responseSupplier.ok(result, Message::class.java)
     }
 
     private fun getMessages(request: ServerRequest): Mono<ServerResponse> {
         val messages = identityProvider.getIdentity(request).flatMapMany {
             messageDao.getAllMessages(it, request.pathVariable("chatId"))
         }
-        return responseSupplier.questionable_ok(messages, Message::class.java)
+        return responseSupplier.ok(messages, Message::class.java)
     }
 }
