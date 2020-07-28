@@ -26,6 +26,7 @@ class MongoMessageDao(
         return chatDao.findChat(message.senderId!!, message.chatId!!)
                 .switchIfEmpty(Mono.error<Chat>(HttpClientErrorException(HttpStatus.NOT_FOUND)))
                 .flatMap {
+                    //todo add 'lastMessageDate' to chat, so as to sort by it
                     if (message.messageId != null) {
                         val query = Query.query(Criteria.where(MongoMessage.MESSAGE_ID_LABEL).`is`(message.messageId)
                                 .and(MongoMessage.SENDER_ID_LABEL).`is`(message.senderId))
@@ -48,12 +49,8 @@ class MongoMessageDao(
                 .switchIfEmpty(Mono.error<Chat>(HttpClientErrorException(HttpStatus.NOT_FOUND)))
                 .flatMapMany {
                     //todo get type of chat and check conditions accordingly
-                    messageRepo.findAllByChatId(chatId)
+                    messageRepo.findAllByChatIdOrderByCreatedAtDesc(chatId)
                 }
                 .map { it.toModel() }
-    }
-
-    override fun deleteAllMessagesOfChat(chatId: Int): Mono<Void> {
-        return messageRepo.deleteAllByChatId(chatId)
     }
 }

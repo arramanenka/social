@@ -7,5 +7,5 @@ import reactor.core.publisher.Mono
 interface MessageRepo : ReactiveMongoRepository<MongoMessage, Int> {
     fun deleteAllByChatId(chatId: Int): Mono<Void>
     fun deleteByChatIdAndMessageIdAndSenderId(chatId: Int, messageId: Int, senderId: String): Mono<MongoMessage>
-    fun findAllByChatId(chatId: Int): Flux<MongoMessage>
+    fun findAllByChatIdOrderByCreatedAtDesc(chatId: Int): Flux<MongoMessage>
 }

@@ -1,7 +1,6 @@
 package com.romanenko.dao.mongo
 
 import com.romanenko.dao.ChatDao
-import com.romanenko.dao.MessageDao
 import com.romanenko.model.Chat
 import com.romanenko.security.Identity
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -18,7 +17,7 @@ import reactor.core.scheduler.Schedulers
 @Component
 class MongoChatDao(
         private val chatRepo: ChatRepo,
-        private val messageDao: MessageDao,
+        private val messageRepo: MessageRepo,
         private val reactiveMongoTemplate: ReactiveMongoTemplate
 ) : ChatDao {
 
@@ -39,7 +38,7 @@ class MongoChatDao(
     override fun deleteChat(identity: Identity, chatId: Int): Mono<Void> {
         return chatRepo.deleteByChatIdAndCreatorId(chatId, identity.id)
                 .doOnSuccess {
-                    messageDao.deleteAllMessagesOfChat(chatId).subscribeOn(Schedulers.parallel()).subscribe()
+                    messageRepo.deleteAllByChatId(chatId).subscribeOn(Schedulers.parallel()).subscribe()
                 }
                 .switchIfEmpty(Mono.error<Void>(HttpClientErrorException(HttpStatus.NOT_FOUND)))
     }

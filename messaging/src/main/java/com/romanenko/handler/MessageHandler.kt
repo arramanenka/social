@@ -54,7 +54,7 @@ class MessageHandler(
 
     private fun getMessages(request: ServerRequest): Mono<ServerResponse> {
         val messages = identityProvider.getIdentity(request).flatMapMany {
-            messageDao.getAllMessages(it, request.pathVariable("chatId").toInt())
+            messageDao.getAllMessages(it, request.pathVariable("chatId").toInt(), )
         }
         return responseSupplier.questionable_ok(messages, Message::class.java)
     }
