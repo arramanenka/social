@@ -21,7 +21,7 @@ class MongoChatDao(
         private val reactiveMongoTemplate: ReactiveMongoTemplate
 ) : ChatDao {
 
-    override fun findChat(userId: String, chatId: Int): Mono<Chat> {
+    override fun findChat(userId: String, chatId: String): Mono<Chat> {
         return chatRepo.findByChatIdAndCreatorIdOrMembersContaining(chatId, userId, userId).map { it.toModel() }
     }
 
@@ -35,7 +35,7 @@ class MongoChatDao(
         return reactiveMongoTemplate.findAndModify(query, update, MongoChat::class.java).map { it.toModel() }
     }
 
-    override fun deleteChat(identity: Identity, chatId: Int): Mono<Void> {
+    override fun deleteChat(identity: Identity, chatId: String): Mono<Void> {
         return chatRepo.deleteByChatIdAndCreatorId(chatId, identity.id)
                 .doOnSuccess {
                     messageRepo.deleteAllByChatId(chatId).subscribeOn(Schedulers.parallel()).subscribe()
@@ -43,13 +43,13 @@ class MongoChatDao(
                 .switchIfEmpty(Mono.error<Void>(HttpClientErrorException(HttpStatus.NOT_FOUND)))
     }
 
-    override fun addMember(identity: Identity, chatId: Int, userId: String): Mono<Void> {
+    override fun addMember(identity: Identity, chatId: String, userId: String): Mono<Void> {
         val query = query(where(MongoChat.CHAT_ID_LABEL).`is`(chatId).and(MongoChat.CREATOR_ID_LABEL).`is`(identity.id))
         val update = Update().addToSet(MongoChat.MEMBERS_LABEL, userId)
         return reactiveMongoTemplate.updateFirst(query, update, MongoChat::class.java).then()
     }
 
-    override fun removeMember(identity: Identity, chatId: Int, userId: String): Mono<Void> {
+    override fun removeMember(identity: Identity, chatId: String, userId: String): Mono<Void> {
         val query = query(where(MongoChat.CHAT_ID_LABEL).`is`(chatId).and(MongoChat.CREATOR_ID_LABEL).`is`(identity.id))
         val update = Update().pull(MongoChat.MEMBERS_LABEL, userId)
         return reactiveMongoTemplate.updateFirst(query, update, MongoChat::class.java).then()

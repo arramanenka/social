@@ -9,12 +9,12 @@ import java.util.*
 class MongoMessage(
         @Id
         @Field(MESSAGE_ID_LABEL)
-        var messageId: Int? = null,
+        var messageId: String? = null,
         @Field(SENDER_ID_LABEL)
         var senderId: String? = null,
         @Field(TEXT_LABEL)
         var text: String? = null,
-        var chatId: Int? = null,
+        var chatId: String? = null,
         @CreatedDate
         var createdAt: Date? = null
 ) {

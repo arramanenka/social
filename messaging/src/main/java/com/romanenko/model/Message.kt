@@ -5,9 +5,9 @@ import java.util.*
 
 @ToString
 data class Message(
-        var messageId: Int? = null,
+        var messageId: String? = null,
         var senderId: String? = null,
         var text: String? = null,
-        var chatId: Int? = null,
+        var chatId: String? = null,
         var createdAt: Date? = null
 )

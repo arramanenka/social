@@ -3,7 +3,6 @@ package com.romanenko.handler
 import com.romanenko.dao.ChatDao
 import com.romanenko.io.ResponseSupplier
 import com.romanenko.model.Chat
-import com.romanenko.model.ChatType
 import com.romanenko.routing.ApiBuilder
 import com.romanenko.routing.Routable
 import com.romanenko.security.IdentityProvider
@@ -22,7 +21,7 @@ class ChatHandler(
 ) : Routable {
     override fun declareRoute(builder: ApiBuilder) {
         builder
-                .post("/chat/", ::saveChat)
+                .post("/chat", ::saveChat)
                 .delete("/chat/{chatId}", ::deleteChat)
                 .get("/chats", ::getOwnChats)
 
@@ -41,12 +40,12 @@ class ChatHandler(
                             .doOnSuccess { it.creatorId = identity.id }
                 }.flatMap {
                     if (it.chatId == null) {
-                        if (it.type == null || it.type!! == ChatType.NOT_SPECIFIED) {
+                        if (it.type == null) {
                             return@flatMap Mono.error<Chat>(HttpClientErrorException(HttpStatus.BAD_REQUEST, "Chat type is not specified"))
                         }
                         return@flatMap chatDao.createChat(it)
                     }
-                    chatDao.updateChat(it)
+                    return@flatMap chatDao.updateChat(it)
                 }
         return responseSupplier.questionable_ok(result, Chat::class.java)
     }
@@ -54,7 +53,7 @@ class ChatHandler(
     private fun deleteChat(request: ServerRequest): Mono<ServerResponse> {
         val result = identityProvider.getIdentity(request)
                 .flatMap {
-                    return@flatMap chatDao.deleteChat(it, request.pathVariable("chatId").toInt())
+                    return@flatMap chatDao.deleteChat(it, request.pathVariable("chatId"))
                 }
         return responseSupplier.questionable_ok(result, Void::class.java)
     }
@@ -70,7 +69,7 @@ class ChatHandler(
     private fun addMember(request: ServerRequest): Mono<ServerResponse> {
         val result = identityProvider.getIdentity(request)
                 .flatMap {
-                    chatDao.addMember(it, request.pathVariable("chatId").toInt(), request.pathVariable("userId"))
+                    chatDao.addMember(it, request.pathVariable("chatId"), request.pathVariable("userId"))
                 }
         return responseSupplier.questionable_ok(result, Void::class.java)
     }
@@ -78,7 +77,7 @@ class ChatHandler(
     private fun removeMember(request: ServerRequest): Mono<ServerResponse> {
         val result = identityProvider.getIdentity(request)
                 .flatMap {
-                    chatDao.removeMember(it, request.pathVariable("chatId").toInt(), request.pathVariable("userId"))
+                    chatDao.removeMember(it, request.pathVariable("chatId"), request.pathVariable("userId"))
                 }
         return responseSupplier.questionable_ok(result, Void::class.java)
     }

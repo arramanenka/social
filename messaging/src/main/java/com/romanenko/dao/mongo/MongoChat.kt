@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Field
 data class MongoChat(
         @Id
         @Field(CHAT_ID_LABEL)
-        var chatId: Int?,
+        var chatId: String?,
         @Field(CREATOR_ID_LABEL)
         var creatorId: String?,
         @Field(NAME_LABEL)

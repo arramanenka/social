@@ -39,12 +39,12 @@ class MongoMessageDao(
                 .map { it.toModel() }
     }
 
-    override fun deleteMessage(identity: Identity, chatId: Int, messageId: Int): Mono<Message> {
+    override fun deleteMessage(identity: Identity, chatId: String, messageId: String): Mono<Message> {
         return messageRepo.deleteByChatIdAndMessageIdAndSenderId(chatId, messageId, identity.id)
                 .map { it.toModel() }
     }
 
-    override fun getAllMessages(identity: Identity, chatId: Int): Flux<Message> {
+    override fun getAllMessages(identity: Identity, chatId: String): Flux<Message> {
         return chatDao.findChat(identity.id, chatId)
                 .switchIfEmpty(Mono.error<Chat>(HttpClientErrorException(HttpStatus.NOT_FOUND)))
                 .flatMapMany {
