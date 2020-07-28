@@ -42,10 +42,12 @@ class ChatHandler(
                     if (it.chatId == null) {
                         if (it.type == null) {
                             return@flatMap Mono.error<Chat>(HttpClientErrorException(HttpStatus.BAD_REQUEST, "Chat type is not specified"))
+                        } else if (it.name.isNullOrBlank()) {
+                            return@flatMap Mono.error<Chat>(HttpClientErrorException(HttpStatus.BAD_REQUEST, "Chat name is not specified"))
                         }
                         return@flatMap chatDao.createChat(it)
                     }
-                    return@flatMap chatDao.updateChat(it)
+                    chatDao.updateChat(it)
                 }
         return responseSupplier.ok(result, Chat::class.java)
     }
