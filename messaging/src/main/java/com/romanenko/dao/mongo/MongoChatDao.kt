@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.core.scheduler.Schedulers
 
 @Component
 class MongoChatDao(
@@ -37,22 +36,38 @@ class MongoChatDao(
 
     override fun deleteChat(identity: Identity, chatId: String): Mono<Void> {
         return chatRepo.deleteByChatIdAndCreatorId(chatId, identity.id)
-                .doOnSuccess {
-                    messageRepo.deleteAllByChatId(chatId).subscribeOn(Schedulers.parallel()).subscribe()
-                }
-                .switchIfEmpty(Mono.error<Void>(HttpClientErrorException(HttpStatus.NOT_FOUND)))
+                .switchIfEmpty(Mono.error<MongoChat>(HttpClientErrorException(HttpStatus.NOT_FOUND)))
+                .flatMap { messageRepo.deleteAllByChatId(chatId) }
     }
 
     override fun addMember(identity: Identity, chatId: String, userId: String): Mono<Void> {
         val query = query(where(MongoChat.CHAT_ID_LABEL).`is`(chatId).and(MongoChat.CREATOR_ID_LABEL).`is`(identity.id))
         val update = Update().addToSet(MongoChat.MEMBERS_LABEL, userId)
-        return reactiveMongoTemplate.updateFirst(query, update, MongoChat::class.java).then()
+        return reactiveMongoTemplate.updateFirst(query, update, MongoChat::class.java)
+                .filterWhen {
+                    if (it.matchedCount == 0L) {
+                        return@filterWhen Mono.error<Boolean>(HttpClientErrorException(HttpStatus.NOT_FOUND))
+                    } else if (it.modifiedCount == 0L) {
+                        return@filterWhen Mono.error<Boolean>(HttpClientErrorException(HttpStatus.BAD_REQUEST, "Member already in chat"))
+                    }
+                    Mono.just(true)
+                }
+                .then()
     }
 
     override fun removeMember(identity: Identity, chatId: String, userId: String): Mono<Void> {
         val query = query(where(MongoChat.CHAT_ID_LABEL).`is`(chatId).and(MongoChat.CREATOR_ID_LABEL).`is`(identity.id))
         val update = Update().pull(MongoChat.MEMBERS_LABEL, userId)
-        return reactiveMongoTemplate.updateFirst(query, update, MongoChat::class.java).then()
+        return reactiveMongoTemplate.updateFirst(query, update, MongoChat::class.java)
+                .filterWhen {
+                    if (it.matchedCount == 0L) {
+                        return@filterWhen Mono.error<Boolean>(HttpClientErrorException(HttpStatus.NOT_FOUND))
+                    } else if (it.modifiedCount == 0L) {
+                        return@filterWhen Mono.error<Boolean>(HttpClientErrorException(HttpStatus.BAD_REQUEST, "Member is not in chat"))
+                    }
+                    Mono.just(true)
+                }
+                .then()
     }
 
     override fun getOwnChats(identity: Identity): Flux<Chat> {

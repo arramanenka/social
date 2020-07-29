@@ -65,14 +65,28 @@ class ChatHandler(
     }
 
     private fun addMember(request: ServerRequest): Mono<ServerResponse> {
+        val chatId = request.pathVariable("chatId")
+        val userId = request.pathVariable("userId")
         val result = identityProvider.getIdentity(request)
-                .flatMap { chatDao.addMember(it, request.pathVariable("chatId"), request.pathVariable("userId")) }
+                .flatMap {
+                    if (it.id == userId) {
+                        return@flatMap Mono.error<Void>(HttpClientErrorException(HttpStatus.BAD_REQUEST, "Cannot add yourself as a member"))
+                    }
+                    chatDao.addMember(it, chatId, userId)
+                }
         return responseSupplier.ok(result, Void::class.java)
     }
 
     private fun removeMember(request: ServerRequest): Mono<ServerResponse> {
+        val chatId = request.pathVariable("chatId")
+        val userId = request.pathVariable("userId")
         val result = identityProvider.getIdentity(request)
-                .flatMap { chatDao.removeMember(it, request.pathVariable("chatId"), request.pathVariable("userId")) }
+                .flatMap {
+                    if (it.id == userId) {
+                        return@flatMap Mono.error<Void>(HttpClientErrorException(HttpStatus.BAD_REQUEST, "Cannot remove yourself from chat"))
+                    }
+                    chatDao.removeMember(it, chatId, userId)
+                }
         return responseSupplier.ok(result, Void::class.java)
     }
 
