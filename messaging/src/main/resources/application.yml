@@ -6,3 +6,5 @@ spring:
       host: localhost
       port: 27017
       database: chat
+uservice:
+  host: localhost:8080
