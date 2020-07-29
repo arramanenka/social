@@ -3,9 +3,11 @@ package com.romanenko.dao.mongo
 import com.romanenko.model.Message
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
 import java.util.*
 
+@Document
 class MongoMessage(
         @Id
         @Field(MESSAGE_ID_LABEL)
