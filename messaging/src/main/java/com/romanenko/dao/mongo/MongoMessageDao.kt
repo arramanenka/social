@@ -32,6 +32,7 @@ class MongoMessageDao(
                                 .and(MongoMessage.SENDER_ID_LABEL).`is`(message.senderId))
                         val update = Update().set(MongoMessage.TEXT_LABEL, message.text)
                         return@flatMap reactiveMongoTemplate.findAndModify(query, update, MongoMessage::class.java)
+                                .switchIfEmpty(Mono.error<MongoMessage>(HttpClientErrorException(HttpStatus.NOT_FOUND)))
                     }
                     //todo get type of chat and check conditions accordingly
                     messageRepo.save(MongoMessage(message))

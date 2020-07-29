@@ -10,7 +10,6 @@ import java.util.*
 @Document
 class MongoMessage(
         @Id
-        @Field(MESSAGE_ID_LABEL)
         var messageId: String? = null,
         @Field(SENDER_ID_LABEL)
         var senderId: String? = null,
@@ -25,7 +24,7 @@ class MongoMessage(
     constructor(message: Message) : this(message.messageId, message.senderId, message.text, message.chatId)
 
     companion object MongoMessageLabels {
-        const val MESSAGE_ID_LABEL = "mId"
+        const val MESSAGE_ID_LABEL = "_id"
         const val SENDER_ID_LABEL = "senderId"
         const val TEXT_LABEL = "txt"
     }
