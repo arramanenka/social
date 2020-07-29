@@ -47,6 +47,7 @@ class MessageHandler(
     private fun deleteMessage(request: ServerRequest): Mono<ServerResponse> {
         val result = identityProvider.getIdentity(request)
                 .flatMap { messageDao.deleteMessage(it, request.pathVariable("chatId"), request.pathVariable("messageId")) }
+                .filter { it != null }
                 .switchIfEmpty(Mono.error(HttpClientErrorException(HttpStatus.BAD_REQUEST, "Message not found")))
         return responseSupplier.ok(result, Message::class.java)
     }
