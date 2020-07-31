@@ -2,6 +2,9 @@ package com.romanenko.dao.mongo
 
 import com.romanenko.connection.ConnectionType
 import com.romanenko.dao.ChatDao
+import com.romanenko.dao.mongo.model.MongoChat
+import com.romanenko.dao.mongo.repository.ChatRepo
+import com.romanenko.dao.mongo.repository.MessageRepo
 import com.romanenko.model.Chat
 import com.romanenko.security.Identity
 import com.romanenko.service.ConnectionService

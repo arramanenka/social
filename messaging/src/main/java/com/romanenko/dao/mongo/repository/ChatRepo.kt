@@ -1,5 +1,6 @@
-package com.romanenko.dao.mongo
+package com.romanenko.dao.mongo.repository
 
+import com.romanenko.dao.mongo.model.MongoChat
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono

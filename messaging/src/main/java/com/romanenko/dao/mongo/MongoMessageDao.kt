@@ -2,6 +2,8 @@ package com.romanenko.dao.mongo
 
 import com.romanenko.dao.ChatDao
 import com.romanenko.dao.MessageDao
+import com.romanenko.dao.mongo.model.MongoMessage
+import com.romanenko.dao.mongo.repository.MessageRepo
 import com.romanenko.model.Chat
 import com.romanenko.model.Message
 import com.romanenko.security.Identity

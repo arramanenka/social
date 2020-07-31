@@ -1,4 +1,4 @@
-package com.romanenko.dao.mongo
+package com.romanenko.dao.mongo.model
 
 import com.romanenko.model.Chat
 import com.romanenko.model.ChatType
