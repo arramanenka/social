@@ -1,9 +1,8 @@
 package com.romanenko.model
 
-data class Chat(
+data class GroupChat(
         var chatId: String?,
         var creatorId: String?,
         var name: String?,
-        var members: Set<String>?,
-        var type: ChatType?
+        var invitedMembers: Set<String>?,
 )

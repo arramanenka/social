@@ -1,10 +1,10 @@
 package com.romanenko.dao.mongo
 
-import com.romanenko.dao.ChatDao
+import com.romanenko.dao.GroupChatDao
 import com.romanenko.dao.MessageDao
 import com.romanenko.dao.mongo.model.MongoMessage
 import com.romanenko.dao.mongo.repository.MessageRepo
-import com.romanenko.model.Chat
+import com.romanenko.model.GroupChat
 import com.romanenko.model.Message
 import com.romanenko.security.Identity
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -20,13 +20,13 @@ import reactor.core.publisher.Mono
 @Component
 class MongoMessageDao(
         private val messageRepo: MessageRepo,
-        private val chatDao: ChatDao,
+        private val groupChatDao: GroupChatDao,
         private val reactiveMongoTemplate: ReactiveMongoTemplate
 ) : MessageDao {
 
     override fun saveMessage(message: Message): Mono<Message> {
-        return chatDao.findChat(message.senderId!!, message.chatId!!)
-                .switchIfEmpty(Mono.error<Chat>(HttpClientErrorException(HttpStatus.NOT_FOUND)))
+        return groupChatDao.findChat(message.senderId!!, message.chatId!!)
+                .switchIfEmpty(Mono.error<GroupChat>(HttpClientErrorException(HttpStatus.NOT_FOUND)))
                 .flatMap {
                     //todo add 'lastMessageDate' to chat, so as to sort by it
                     if (message.messageId != null) {
@@ -48,8 +48,8 @@ class MongoMessageDao(
     }
 
     override fun getAllMessages(identity: Identity, chatId: String): Flux<Message> {
-        return chatDao.findChat(identity.id, chatId)
-                .switchIfEmpty(Mono.error<Chat>(HttpClientErrorException(HttpStatus.NOT_FOUND)))
+        return groupChatDao.findChat(identity.id, chatId)
+                .switchIfEmpty(Mono.error<GroupChat>(HttpClientErrorException(HttpStatus.NOT_FOUND)))
                 .flatMapMany {
                     //todo get type of chat and check conditions accordingly
                     messageRepo.findAllByChatIdOrderByCreatedAtDesc(chatId)

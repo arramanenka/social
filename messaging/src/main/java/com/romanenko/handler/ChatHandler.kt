@@ -1,8 +1,8 @@
 package com.romanenko.handler
 
-import com.romanenko.dao.ChatDao
+import com.romanenko.dao.GroupChatDao
 import com.romanenko.io.ResponseSupplier
-import com.romanenko.model.Chat
+import com.romanenko.model.GroupChat
 import com.romanenko.routing.ApiBuilder
 import com.romanenko.routing.Routable
 import com.romanenko.security.IdentityProvider
@@ -15,56 +15,57 @@ import reactor.core.publisher.Mono
 
 @Component
 class ChatHandler(
-        private val chatDao: ChatDao,
+        private val groupChatDao: GroupChatDao,
         private val responseSupplier: ResponseSupplier,
         private val identityProvider: IdentityProvider
 ) : Routable {
     override fun declareRoute(builder: ApiBuilder) {
         builder
-                .post("/chat", ::saveChat)
-                .delete("/chat/{chatId}", ::deleteChat)
-                .get("/chats", ::getOwnChats)
+                .post("/chat/direct", ::saveDirectChat)
+                .post("/chat/group", ::saveGroupChat)
 
-                .post("/chat/{chatId}/member/{userId}", ::addMember)
-                .delete("/chat/{chatId}/member/{userId}", ::removeMember)
+                .delete("/chat/{chatId}", ::deleteChat)
+                .get("/chats/direct", ::getDirectChats)
+                .get("/chats/group", ::getGroupChats)
+
+                .post("/chat/group/{chatId}/invitation/{userId}", ::inviteMember)
+                .delete("/chat/group/{chatId}/invitation/{userId}", ::removeInvitation)
     }
 
     /**
      * Either create chat, or update chat name
      */
-    private fun saveChat(request: ServerRequest): Mono<ServerResponse> {
+    private fun saveGroupChat(request: ServerRequest): Mono<ServerResponse> {
         val result = identityProvider.getIdentity(request)
                 .flatMap { identity ->
-                    request.bodyToMono(Chat::class.java)
-                            .switchIfEmpty(Mono.error<Chat>(HttpClientErrorException(HttpStatus.BAD_REQUEST, "Empty chat")))
+                    request.bodyToMono(GroupChat::class.java)
+                            .switchIfEmpty(Mono.error<GroupChat>(HttpClientErrorException(HttpStatus.BAD_REQUEST, "Empty chat")))
                             .doOnSuccess { it.creatorId = identity.id }
                 }.flatMap {
                     if (it.chatId == null) {
-                        if (it.type == null) {
-                            return@flatMap Mono.error<Chat>(HttpClientErrorException(HttpStatus.BAD_REQUEST, "Chat type is not specified"))
-                        } else if (it.name.isNullOrBlank()) {
-                            return@flatMap Mono.error<Chat>(HttpClientErrorException(HttpStatus.BAD_REQUEST, "Chat name is not specified"))
+                        if (it.name.isNullOrBlank()) {
+                            return@flatMap Mono.error<GroupChat>(HttpClientErrorException(HttpStatus.BAD_REQUEST, "Chat name is not specified"))
                         }
-                        return@flatMap chatDao.createChat(it)
+                        return@flatMap groupChatDao.createChat(it)
                     }
-                    chatDao.updateChat(it)
+                    groupChatDao.updateChat(it)
                 }
-        return responseSupplier.ok(result, Chat::class.java)
+        return responseSupplier.ok(result, GroupChat::class.java)
     }
 
     private fun deleteChat(request: ServerRequest): Mono<ServerResponse> {
         val result = identityProvider.getIdentity(request)
-                .flatMap { chatDao.deleteChat(it, request.pathVariable("chatId")) }
+                .flatMap { groupChatDao.deleteChat(it, request.pathVariable("chatId")) }
         return responseSupplier.ok(result, Void::class.java)
     }
 
-    private fun getOwnChats(request: ServerRequest): Mono<ServerResponse> {
+    private fun getGroupChats(request: ServerRequest): Mono<ServerResponse> {
         val result = identityProvider.getIdentity(request)
-                .flatMapMany { chatDao.getOwnChats(it) }
-        return responseSupplier.ok(result, Chat::class.java)
+                .flatMapMany { groupChatDao.getOwnChats(it) }
+        return responseSupplier.ok(result, GroupChat::class.java)
     }
 
-    private fun addMember(request: ServerRequest): Mono<ServerResponse> {
+    private fun inviteMember(request: ServerRequest): Mono<ServerResponse> {
         val chatId = request.pathVariable("chatId")
         val userId = request.pathVariable("userId")
         val result = identityProvider.getIdentity(request)
@@ -72,12 +73,12 @@ class ChatHandler(
                     if (it.id == userId) {
                         return@flatMap Mono.error<Void>(HttpClientErrorException(HttpStatus.BAD_REQUEST, "Cannot add yourself as a member"))
                     }
-                    chatDao.addMember(it, chatId, userId)
+                    groupChatDao.inviteMember(it, chatId, userId)
                 }
         return responseSupplier.ok(result, Void::class.java)
     }
 
-    private fun removeMember(request: ServerRequest): Mono<ServerResponse> {
+    private fun removeInvitation(request: ServerRequest): Mono<ServerResponse> {
         val chatId = request.pathVariable("chatId")
         val userId = request.pathVariable("userId")
         val result = identityProvider.getIdentity(request)
@@ -85,7 +86,7 @@ class ChatHandler(
                     if (it.id == userId) {
                         return@flatMap Mono.error<Void>(HttpClientErrorException(HttpStatus.BAD_REQUEST, "Cannot remove yourself from chat"))
                     }
-                    chatDao.removeMember(it, chatId, userId)
+                    groupChatDao.removeInvitation(it, chatId, userId)
                 }
         return responseSupplier.ok(result, Void::class.java)
     }
