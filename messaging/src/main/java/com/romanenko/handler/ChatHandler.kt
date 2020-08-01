@@ -21,15 +21,24 @@ class ChatHandler(
 ) : Routable {
     override fun declareRoute(builder: ApiBuilder) {
         builder
-                .post("/chat/direct", ::saveDirectChat)
-                .post("/chat/group", ::saveGroupChat)
-
-                .delete("/chat/{chatId}", ::deleteChat)
+                .post("/chat/direct/{userId}", ::saveDirectChat)
                 .get("/chats/direct", ::getDirectChats)
+
+                .post("/chat/group", ::saveGroupChat)
+                .delete("/chat/{chatId}/group", ::deleteChat)
                 .get("/chats/group", ::getGroupChats)
 
-                .post("/chat/group/{chatId}/invitation/{userId}", ::inviteMember)
-                .delete("/chat/group/{chatId}/invitation/{userId}", ::removeInvitation)
+                .post("/chat/{chatId}/group/{userId}/role", ::assignRole)
+
+                .delete("/chat/{chatId}/group/membership", ::leaveChat)
+                .delete("/chat/{chatId}/group/membership/{userId}", ::kickFromChat)
+
+                .post("/chat/{chatId}/group/invitation/{userId}", ::inviteMember)
+                .delete("/chat/{chatId}/group/invitation/{userId}", ::removeInvitation)
+
+                .post("/chat/{chatId}/group/invitation", ::acceptInvitation)
+                .delete("/chat/{chatId}/group/invitation", ::declineInvitation)
+                .get("/chats/invitations", ::getInvitations)
     }
 
     /**

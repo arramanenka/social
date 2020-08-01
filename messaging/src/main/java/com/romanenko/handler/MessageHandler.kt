@@ -21,9 +21,13 @@ class MessageHandler(
 ) : Routable {
     override fun declareRoute(builder: ApiBuilder) {
         builder
-                .post("/message/{chatId}", ::postMessage)
-                .delete("/message/{chatId}/{messageId}", ::deleteMessage)
-                .get("/messages/{chatId}", ::getMessages)
+                .post("/message/group/{chatId}", ::postMessage)
+                .delete("/message/group/{chatId}/{messageId}", ::deleteMessage)
+                .get("/messages/group/{chatId}", ::getMessages)
+
+                .post("/message/direct/{userId}", ::postDirect)
+                .delete("/message/direct/{userId}/{messageId}", ::deleteDirect)
+                .get("/messages/direct/{userId}", ::getDirectMessages)
     }
 
     private fun postMessage(request: ServerRequest): Mono<ServerResponse> {
