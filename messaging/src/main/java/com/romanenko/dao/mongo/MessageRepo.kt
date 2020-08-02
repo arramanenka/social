@@ -1,8 +1,13 @@
 package com.romanenko.dao.mongo
 
+import org.springframework.data.mongodb.repository.Query
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 interface MessageRepo : ReactiveMongoRepository<MongoMessage, String> {
     fun deleteByMessageIdAndSenderIdAndReceiverId(messageId: String, senderId: String, receiverId: String): Mono<MongoMessage>
+
+    @Query("{'\$or': [{'receiverId':?0, 'senderId':?1}, {'receiverId':?1, 'senderId':?0}]}.sort(createdAt: 1).skip(?1).limit(?2)")
+    fun findAllMessagesBetweenUsers(user: String, secondUser: String, skipAmount: Int, limit: Int): Flux<MongoMessage>
 }

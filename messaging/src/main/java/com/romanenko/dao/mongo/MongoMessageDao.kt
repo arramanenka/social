@@ -23,6 +23,6 @@ class MongoMessageDao(
     }
 
     override fun getMessages(queryingPerson: String, userId: String, pageQuery: PageQuery): Flux<Message> {
-        TODO("Not yet implemented")
+        return messageRepo.findAllMessagesBetweenUsers(queryingPerson, userId, pageQuery.calculateSkipAmount(), pageQuery.pageSize).map { it.toModel() }
     }
 }
