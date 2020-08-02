@@ -32,13 +32,13 @@ class DefaultMessageService(
             return Mono.error<Message>(HttpClientErrorException(HttpStatus.BAD_REQUEST, "Invalid users of direct chat"))
         }
         if (message.messageId.isNullOrEmpty()) {
-            return Mono.error<Message>(HttpClientErrorException(HttpStatus.BAD_REQUEST, "Invalid message id"))
+            return Mono.error<Message>(HttpClientErrorException(HttpStatus.NOT_FOUND))
         }
         return messageDao.deleteMessage(message)
     }
 
     override fun getMessages(identity: Identity, userId: String, pageQuery: PageQuery): Flux<Message> {
-        if (identity.id == userId) {
+        if (identity.id == userId || userId.isBlank()) {
             return Flux.error(HttpClientErrorException(HttpStatus.BAD_REQUEST, "Invalid user of direct chat"))
         }
         return messageDao.getMessages(identity.id, userId, pageQuery)
