@@ -1,7 +1,8 @@
-package com.romanenko.service
+package com.romanenko.service.impl
 
 import com.romanenko.connection.ConnectionType
 import com.romanenko.connection.UserConnectionCache
+import com.romanenko.service.ConnectionService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
