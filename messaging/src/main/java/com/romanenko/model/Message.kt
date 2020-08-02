@@ -6,11 +6,12 @@ data class Message(
         var receiverId: String? = null,
         var text: String? = null
 ) {
-    fun areUsersValid(): Boolean {
-        return senderId != receiverId
+
+    fun areUsersNotValid(): Boolean {
+        return senderId == null || receiverId == null || senderId.equals(receiverId)
     }
 
-    fun isTextValid(): Boolean {
-        return text?.isNotBlank() ?: false
+    fun isTextNotValid(): Boolean {
+        return text?.isBlank() ?: true
     }
 }
