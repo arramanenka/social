@@ -23,7 +23,7 @@ class DefaultMessageService(
             if (it.isTextNotValid()) {
                 return@flatMap Mono.error<Message>(HttpClientErrorException(HttpStatus.BAD_REQUEST, "Message is blank"))
             }
-            messageDao.sendMessage(message)
+            messageDao.sendMessage(it)
         }
     }
 

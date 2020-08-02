@@ -70,11 +70,12 @@ internal class DefaultMessageServiceTest {
 
     @Test
     fun `verify send message delegates to message dao`() {
-        val message = Mono.just(Message(senderId = "b", receiverId = "a", text = "message text"))
+        val message = Message(senderId = "b", receiverId = "a", text = "message text")
+        val messageMono = Mono.just(message)
 
-        `when`(messageDaoMock.sendMessage(message)).thenReturn(message)
+        `when`(messageDaoMock.sendMessage(message)).thenReturn(Mono.just(message))
 
-        StepVerifier.create(messageService.sendMessage(message))
+        StepVerifier.create(messageService.sendMessage(messageMono))
                 .then { verify(messageDaoMock).sendMessage(message) }
                 .expectNextCount(1)
                 .expectComplete()
