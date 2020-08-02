@@ -3,6 +3,8 @@ package com.romanenko.dao.mongo
 import com.romanenko.dao.MessageDao
 import com.romanenko.io.PageQuery
 import com.romanenko.model.Message
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -23,6 +25,8 @@ class MongoMessageDao(
     }
 
     override fun getMessages(queryingPerson: String, userId: String, pageQuery: PageQuery): Flux<Message> {
-        return messageRepo.findAllMessagesBetweenUsers(queryingPerson, userId, pageQuery.calculateSkipAmount(), pageQuery.pageSize).map { it.toModel() }
+        val pageable = PageRequest.of(pageQuery.page, pageQuery.pageSize, Sort.by(Sort.Direction.DESC, "createdAt"))
+        return messageRepo.findAllMessagesBetweenUsers(queryingPerson, userId, pageable)
+                .map { it.toModel() }
     }
 }

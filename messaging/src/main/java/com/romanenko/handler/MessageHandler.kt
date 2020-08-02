@@ -34,7 +34,7 @@ class MessageHandler(
                                 m.receiverId = request.pathVariable("userId")
                             }
                 }
-        return responseSupplier.ok(messageService.sendMessage(message))
+        return responseSupplier.ok(messageService.sendMessage(message), Message::class.java)
     }
 
     private fun deleteMessage(request: ServerRequest): Mono<ServerResponse> {

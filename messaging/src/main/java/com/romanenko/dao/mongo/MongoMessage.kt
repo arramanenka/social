@@ -3,10 +3,12 @@ package com.romanenko.dao.mongo
 import com.romanenko.model.Message
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.mapping.Document
 import java.util.*
 
-@Document
+@Document(collection = "messages")
+@CompoundIndex(name = "user_index", def = "{'senderId' : 1, 'receiverId' : 1}")
 class MongoMessage(
         @Id
         var messageId: String? = null,
