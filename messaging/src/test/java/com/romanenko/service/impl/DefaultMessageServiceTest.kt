@@ -17,7 +17,7 @@ internal class DefaultMessageServiceTest {
     private val messageService = DefaultMessageService(messageDaoMock)
 
     @Test
-    fun testSendMessageReceiverNotPresent() {
+    fun `verify bad request when receiver not present`() {
         val message = Mono.just(Message(senderId = "a", text = "message text"))
 
         StepVerifier.create(messageService.sendMessage(message))
@@ -30,7 +30,7 @@ internal class DefaultMessageServiceTest {
     }
 
     @Test
-    fun testSendMessageSenderNotPresent() {
+    fun `verify bad request when sender not present`() {
         val message = Mono.just(Message(receiverId = "a", text = "message text"))
 
         StepVerifier.create(messageService.sendMessage(message))
@@ -43,7 +43,7 @@ internal class DefaultMessageServiceTest {
     }
 
     @Test
-    fun testSendMessageWithImproperUsers() {
+    fun `verify bad request with improper users`() {
         val message = Mono.just(Message(senderId = "a", receiverId = "a", text = "message text"))
 
         StepVerifier.create(messageService.sendMessage(message))
@@ -56,7 +56,7 @@ internal class DefaultMessageServiceTest {
     }
 
     @Test
-    fun testSendMessageWithoutText() {
+    fun `verify bad request when text is not present`() {
         val message = Mono.just(Message(receiverId = "a", senderId = "b"))
 
         StepVerifier.create(messageService.sendMessage(message))
@@ -69,7 +69,7 @@ internal class DefaultMessageServiceTest {
     }
 
     @Test
-    fun testSendMessageDelegatesMessageToDao() {
+    fun `verify send message delegates to message dao`() {
         val message = Mono.just(Message(senderId = "b", receiverId = "a", text = "message text"))
 
         `when`(messageDaoMock.sendMessage(message)).thenReturn(message)
@@ -83,7 +83,7 @@ internal class DefaultMessageServiceTest {
 
 
     @Test
-    fun testDeleteMessageWithImproperQueryingPersonAndUserId() {
+    fun `verify delete message results in bad request with improper users`() {
         val message = Message(receiverId = "a", senderId = "a", messageId = "id1")
 
         StepVerifier.create(messageService.deleteMessage(message))
@@ -96,7 +96,7 @@ internal class DefaultMessageServiceTest {
     }
 
     @Test
-    fun testDeleteMessageWithoutMessageId() {
+    fun `verify delete message results in not found without message id`() {
         val message = Message(receiverId = "a", senderId = "b")
 
         StepVerifier.create(messageService.deleteMessage(message))
@@ -109,7 +109,7 @@ internal class DefaultMessageServiceTest {
     }
 
     @Test
-    fun testDeleteMessageDelegatesMessageToDao() {
+    fun `verify delete message delegates to message dao`() {
         val message = Message(receiverId = "a", senderId = "b", messageId = "id1")
 
         `when`(messageDaoMock.deleteMessage(message)).thenReturn(Mono.just(message))
@@ -122,7 +122,7 @@ internal class DefaultMessageServiceTest {
     }
 
     @Test
-    fun testGetMessagesWithImproperQueryingPersonAndUserId() {
+    fun `verify get messags results in bad request with improper users`() {
         val pageQuery = PageQuery(0, 10)
         val identityMock = mock(Identity::class.java)
         `when`(identityMock.id).thenReturn("b")
@@ -137,7 +137,7 @@ internal class DefaultMessageServiceTest {
     }
 
     @Test
-    fun testGetMessagesSuccess() {
+    fun `verify get messages delegates to message dao`() {
         val identityMock = mock(Identity::class.java)
         val pageQuery = PageQuery(0, 10)
 
