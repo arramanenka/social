@@ -25,14 +25,14 @@ public class ConnectionHandler implements Routable {
 
     @Override
     public void declareRoute(ApiBuilder builder) {
-        builder.get("/{id}/followers", this::getAllFollowers)
-                .get("/{id}/following", this::getALlFollowing)
-                .post("/follower/{id}", this::addFollower)
-                .delete("/follower/{id}", this::removeFollower)
+        builder.get("/connections/{id}/followers", this::getAllFollowers)
+                .get("/connections/{id}/following", this::getALlFollowing)
+                .post("/connections/follower/{id}", this::addFollower)
+                .delete("/connections/follower/{id}", this::removeFollower)
 
-                .get("/blacklist", this::getAllBlacklisted)
-                .post("/blacklist/{id}", this::addToBlacklist)
-                .delete("/blacklist/{id}", this::removeFromBlacklist);
+                .get("/connections/blacklist", this::getAllBlacklisted)
+                .post("/connections/blacklist/{id}", this::addToBlacklist)
+                .delete("/connections/blacklist/{id}", this::removeFromBlacklist);
     }
 
     @NonNull
