@@ -3,7 +3,21 @@ package com.romanenko.connection
 
 enum class PermissionKey(val key: String) {
     MESSAGE("message"),
+
+
     ;
+
+    companion object {
+        @JvmStatic
+        fun forName(name: String): PermissionKey? {
+            for (value in values()) {
+                if (value.key.contentEquals(name)) {
+                    return value
+                }
+            }
+            return null
+        }
+    }
 }
 
 enum class Permission {
