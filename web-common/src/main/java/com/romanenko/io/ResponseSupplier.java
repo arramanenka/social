@@ -1,5 +1,6 @@
 package com.romanenko.io;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -20,4 +21,7 @@ public interface ResponseSupplier {
     Mono<ServerResponse> noContent();
 
     Mono<ServerResponse> error(Throwable e);
+
+    @NotNull
+    Mono<ServerResponse> notFound(@NotNull String message);
 }

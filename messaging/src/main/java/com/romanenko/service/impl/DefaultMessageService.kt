@@ -1,9 +1,12 @@
 package com.romanenko.service.impl
 
+import com.romanenko.connection.Permission
+import com.romanenko.connection.PermissionKey
 import com.romanenko.dao.MessageDao
 import com.romanenko.io.PageQuery
 import com.romanenko.model.Message
 import com.romanenko.security.Identity
+import com.romanenko.service.ConnectionService
 import com.romanenko.service.MessageService
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
@@ -13,7 +16,8 @@ import reactor.core.publisher.Mono
 
 @Component
 class DefaultMessageService(
-        private val messageDao: MessageDao
+        private val messageDao: MessageDao,
+        private val connectionService: ConnectionService
 ) : MessageService {
     override fun sendMessage(message: Mono<Message>): Mono<Message> {
         return message.flatMap {
@@ -23,7 +27,10 @@ class DefaultMessageService(
             if (it.isTextNotValid()) {
                 return@flatMap Mono.error<Message>(HttpClientErrorException(HttpStatus.BAD_REQUEST, "Message is blank"))
             }
-            messageDao.sendMessage(it)
+            connectionService.getPermission(it.senderId!!, it.receiverId!!, PermissionKey.MESSAGE)
+                    .filter { permission -> Permission.GRANTED == permission }
+                    .flatMap { _ -> messageDao.sendMessage(it) }
+                    .switchIfEmpty(Mono.error<Message>(HttpClientErrorException(HttpStatus.FORBIDDEN)))
         }
     }
 

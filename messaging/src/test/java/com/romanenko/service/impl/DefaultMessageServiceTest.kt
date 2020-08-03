@@ -1,9 +1,12 @@
 package com.romanenko.service.impl
 
+import com.romanenko.connection.Permission
+import com.romanenko.connection.PermissionKey
 import com.romanenko.dao.MessageDao
 import com.romanenko.io.PageQuery
 import com.romanenko.model.Message
 import com.romanenko.security.Identity
+import com.romanenko.service.ConnectionService
 import org.junit.Test
 import org.mockito.Mockito.*
 import org.springframework.http.HttpStatus
@@ -13,8 +16,9 @@ import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 
 internal class DefaultMessageServiceTest {
+    private val connectionServiceMock = mock(ConnectionService::class.java)
     private val messageDaoMock = mock(MessageDao::class.java)
-    private val messageService = DefaultMessageService(messageDaoMock)
+    private val messageService = DefaultMessageService(messageDaoMock, connectionServiceMock)
 
     @Test
     fun `verify bad request when receiver not present`() {
@@ -74,12 +78,31 @@ internal class DefaultMessageServiceTest {
         val messageMono = Mono.just(message)
 
         `when`(messageDaoMock.sendMessage(message)).thenReturn(Mono.just(message))
+        `when`(connectionServiceMock.getPermission("b", "a", PermissionKey.MESSAGE)).thenReturn(Mono.just(Permission.GRANTED))
 
         StepVerifier.create(messageService.sendMessage(messageMono))
                 .then { verify(messageDaoMock).sendMessage(message) }
                 .expectNextCount(1)
                 .expectComplete()
                 .verify()
+    }
+
+
+    @Test
+    fun `verify send message returns forbidden if permission is not granted`() {
+        val message = Message(senderId = "b", receiverId = "a", text = "message text")
+        val messageMono = Mono.just(message)
+
+        `when`(messageDaoMock.sendMessage(message)).thenReturn(Mono.just(message))
+        `when`(connectionServiceMock.getPermission("b", "a", PermissionKey.MESSAGE)).thenReturn(Mono.just(Permission.DENIED))
+
+        StepVerifier.create(messageService.sendMessage(messageMono))
+                .verifyErrorMatches {
+                    if (it is HttpClientErrorException) {
+                        return@verifyErrorMatches it.statusCode == HttpStatus.FORBIDDEN
+                    }
+                    false
+                }
     }
 
 
