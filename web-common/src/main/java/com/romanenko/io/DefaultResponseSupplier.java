@@ -1,6 +1,7 @@
 package com.romanenko.io;
 
 import lombok.extern.log4j.Log4j2;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -72,6 +73,14 @@ public class DefaultResponseSupplier implements ResponseSupplier {
         }
         log.error(e);
         return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+    @NotNull
+    @Override
+    public Mono<ServerResponse> notFound(@NotNull String message) {
+        return ServerResponse.status(HttpStatus.NOT_FOUND)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(createResponseMessage(message));
     }
 
     private String createResponseMessage(String message) {
