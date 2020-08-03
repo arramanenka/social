@@ -1,6 +1,7 @@
 package com.romanenko.service.impl
 
-import com.romanenko.connection.ConnectionType
+import com.romanenko.connection.Permission
+import com.romanenko.connection.PermissionKey
 import com.romanenko.connection.UserConnectionCache
 import com.romanenko.service.ConnectionService
 import org.springframework.beans.factory.annotation.Value
@@ -12,19 +13,21 @@ import reactor.core.publisher.Mono
 class BridgedConnectionService(
         private val userConnectionCache: UserConnectionCache,
         @Value("\${uservice.host}")
-        private val userviceHost: String
+        private val userviceHost: String,
+        @Value("\${uservice.port}")
+        private val uservicePort: String
 ) : ConnectionService {
-    private val webclient: WebClient = WebClient.create(userviceHost)
+    private val webclient: WebClient = WebClient.create("http://$userviceHost:$uservicePort")
 
-    override fun getConnectionType(initiatorId: String, otherPersonId: String): Mono<ConnectionType> {
-        return userConnectionCache.getCachedConnectionType(initiatorId, otherPersonId)
-                .switchIfEmpty(Mono.defer { getConnectionTypeFromUservice(initiatorId, otherPersonId) })
+    override fun getPermission(initiatorId: String, otherPersonId: String, permissionKey: PermissionKey): Mono<Permission> {
+        return userConnectionCache.getPermission(initiatorId, otherPersonId, permissionKey)
+                .switchIfEmpty(Mono.defer { getPermissionUservice(initiatorId, otherPersonId, permissionKey) })
     }
 
-    private fun getConnectionTypeFromUservice(initiatorId: String, otherPersonId: String): Mono<ConnectionType> {
+    private fun getPermissionUservice(initiatorId: String, otherPersonId: String, permissionKey: PermissionKey): Mono<Permission> {
         return webclient.get()
-                .uri("users/connection/{initiatorId}/{otherPersonId}", initiatorId, otherPersonId)
+                .uri("/permissions/{queryingUserId}/{userId}/{permissionKey}", initiatorId, otherPersonId, permissionKey)
                 .exchange()
-                .flatMap { it.bodyToMono(ConnectionType::class.java) }
+                .flatMap { it.bodyToMono(Permission::class.java) }
     }
 }

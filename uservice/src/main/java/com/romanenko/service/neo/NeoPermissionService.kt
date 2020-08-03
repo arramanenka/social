@@ -26,6 +26,7 @@ class NeoPermissionService(
                 // in real world scenario, users have different settings for different types of activities.
                 // For now lets assume that you just don't have to be blocked for any type of permission key
                 .map {
+                    println("searching")
                     if (it == ConnectionType.BLACKLIST) {
                         return@map Permission.BLOCKED
                     }

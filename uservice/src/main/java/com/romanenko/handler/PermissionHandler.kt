@@ -22,6 +22,7 @@ class PermissionHandler(
     }
 
     private fun getPermission(request: ServerRequest): Mono<ServerResponse> {
+        println("took request")
         val queryingUserId = request.pathVariable("queryingUserId")
         val userId = request.pathVariable("userId")
         val permissionKey = PermissionKey.forName(request.pathVariable("permissionKey"))
