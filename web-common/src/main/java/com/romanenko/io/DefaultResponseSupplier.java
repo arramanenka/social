@@ -6,7 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.reactive.function.server.ServerResponse;
-import org.springframework.web.server.ServerWebInputException;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -64,8 +64,8 @@ public class DefaultResponseSupplier implements ResponseSupplier {
             return ServerResponse.status(exception.getStatusCode())
                     .contentType(MediaType.APPLICATION_JSON)
                     .bodyValue(createResponseMessage(exception.getStatusText()));
-        } else if (e instanceof ServerWebInputException) {
-            ServerWebInputException exception = (ServerWebInputException) e;
+        } else if (e instanceof ResponseStatusException) {
+            ResponseStatusException exception = (ResponseStatusException) e;
             return ServerResponse.status(exception.getStatus())
                     .contentType(MediaType.APPLICATION_JSON)
                     .bodyValue(createResponseMessage(exception.getReason()));

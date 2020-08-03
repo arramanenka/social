@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
+//todo search for failsafe solution (retry on fail to connect)
 public class RedisUserConnectionCache implements UserConnectionCache {
 
     private final RMapReactive<String, String> connections;
