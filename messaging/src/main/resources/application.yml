@@ -6,6 +6,12 @@ spring:
       host: localhost
       port: 27017
       database: chat
+    cassandra:
+      local-datacenter: datacenter1
+      keyspace-name: chat
+      schema-action: create_if_not_exists
 uservice:
   host: localhost
   port: 8080
+message:
+  storage: cassandra
