@@ -21,7 +21,7 @@ class CassandraMessageDao(
     }
 
     override fun deleteMessage(message: Message): Mono<Message> {
-        return messageRepo.deleteDistinctByMessageKeyAndMessageId(MessageKey(message), UUID.fromString(message.messageId))
+        return messageRepo.deleteMessage(message.senderId!!, message.receiverId!!, UUID.fromString(message.messageId))
                 .map { it.toModel() }
     }
 
