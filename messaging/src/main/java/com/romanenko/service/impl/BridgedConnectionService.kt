@@ -5,7 +5,9 @@ import com.romanenko.connection.PermissionKey
 import com.romanenko.connection.UserConnectionCache
 import com.romanenko.service.ConnectionService
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 
@@ -26,8 +28,10 @@ class BridgedConnectionService(
 
     private fun getPermissionUservice(initiatorId: String, otherPersonId: String, permissionKey: PermissionKey): Mono<Permission> {
         return webclient.get()
-                .uri("/permissions/{queryingUserId}/{userId}/{permissionKey}", initiatorId, otherPersonId, permissionKey)
+                .uri("/permissions/{queryingUserId}/{userId}/{permissionKey}", initiatorId, otherPersonId, permissionKey.key)
                 .exchange()
+                .filter { it.statusCode().is4xxClientError }
                 .flatMap { it.bodyToMono(Permission::class.java) }
+                .switchIfEmpty(Mono.error<Permission>(HttpClientErrorException(HttpStatus.FORBIDDEN)))
     }
 }
