@@ -22,4 +22,8 @@ public class PageQuery {
     public int calculateSkipAmount() {
         return page * pageSize;
     }
+
+    public int fullRawQueryAmount() {
+        return calculateSkipAmount() + pageSize;
+    }
 }

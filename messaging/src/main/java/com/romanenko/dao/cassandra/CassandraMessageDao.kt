@@ -4,8 +4,7 @@ import com.romanenko.dao.MessageDao
 import com.romanenko.io.PageQuery
 import com.romanenko.model.Message
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Sort
+import org.springframework.data.cassandra.core.query.CassandraPageRequest
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -26,12 +25,11 @@ class CassandraMessageDao(
                 .map { it.toModel() }
     }
 
+    //todo continuously check spring updates on pagination. Right now the only option is to skip manually
     override fun getMessages(queryingPerson: String, userId: String, pageQuery: PageQuery): Flux<Message> {
-        val pageable = PageRequest.of(pageQuery.page, pageQuery.pageSize, Sort.by(Sort.Direction.DESC, "createdAt"))
-        return messageRepo.findAllByMessageKeyOrMessageKey(
-                MessageKey(queryingPerson, userId),
-                MessageKey(userId, queryingPerson),
-                pageable
-        ).map { it.toModel() }
+        val pageable = CassandraPageRequest.first(pageQuery.fullRawQueryAmount())
+        return messageRepo.findMessagesBetweenUsers(queryingPerson, userId, pageable)
+                .skip(pageQuery.calculateSkipAmount().toLong())
+                .map { it.toModel() }
     }
 }
