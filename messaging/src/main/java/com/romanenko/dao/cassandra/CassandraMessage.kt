@@ -23,10 +23,7 @@ class CassandraMessage(
 ) {
     fun toModel(): Message = Message(messageId.toString(), messageKey.senderId, messageKey.receiverId, text, messageKey.createdAt)
 
-    constructor(message: Message) : this(
-            MessageKey(senderId = message.senderId!!, receiverId = message.receiverId!!),
-            message.text
-    )
+    constructor(message: Message) : this(MessageKey(message), message.text)
 }
 
 @PrimaryKeyClass
@@ -39,4 +36,6 @@ class MessageKey(
         var receiverId: String,
         @PrimaryKeyColumn(name = "createdAt", type = PrimaryKeyType.CLUSTERED, ordering = Ordering.DESCENDING)
         var createdAt: Date? = Date()
-) : Serializable
+) : Serializable {
+    constructor(message: Message) : this(message.senderId!!, message.receiverId!!)
+}

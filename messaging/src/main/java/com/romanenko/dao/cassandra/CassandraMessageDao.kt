@@ -4,9 +4,12 @@ import com.romanenko.dao.MessageDao
 import com.romanenko.io.PageQuery
 import com.romanenko.model.Message
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.util.*
 
 @Component
 @ConditionalOnProperty(name = ["message.storage"], havingValue = "cassandra")
@@ -19,10 +22,16 @@ class CassandraMessageDao(
     }
 
     override fun deleteMessage(message: Message): Mono<Message> {
-        TODO("Not yet implemented")
+        return messageRepo.deleteDistinctByMessageKeyAndMessageId(MessageKey(message), UUID.fromString(message.messageId))
+                .map { it.toModel() }
     }
 
     override fun getMessages(queryingPerson: String, userId: String, pageQuery: PageQuery): Flux<Message> {
-        TODO("Not yet implemented")
+        val pageable = PageRequest.of(pageQuery.page, pageQuery.pageSize, Sort.by(Sort.Direction.DESC, "createdAt"))
+        return messageRepo.findAllByMessageKeyOrMessageKey(
+                MessageKey(queryingPerson, userId),
+                MessageKey(userId, queryingPerson),
+                pageable
+        ).map { it.toModel() }
     }
 }
