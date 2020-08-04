@@ -4,6 +4,7 @@ import com.romanenko.dao.MessageDao
 import com.romanenko.io.PageQuery
 import com.romanenko.model.Message
 import org.bson.Document
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.event.ApplicationStartedEvent
 import org.springframework.context.ApplicationListener
 import org.springframework.data.domain.PageRequest
@@ -15,6 +16,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Component
+@ConditionalOnProperty(name = ["message.storage"], havingValue = "mongo", matchIfMissing = true)
 class MongoMessageDao(
         private val messageRepo: MessageRepo,
         private val mongoTemplate: ReactiveMongoTemplate
