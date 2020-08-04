@@ -11,7 +11,7 @@ import java.util.*
 @ConditionalOnProperty(name = ["message.storage"], havingValue = "cassandra")
 interface MessageRepo : ReactiveCassandraRepository<CassandraMessage, MessageKey> {
 
-    @Query("delete from cassandramessage where receiverid = ?0 and senderid  = ?1 and messageid=?2")
+    @Query("delete from cassandramessage where receiverid = ?1 and senderid  = ?0 and messageid=?2")
     fun deleteMessage(senderId: String, receiverId: String, messageId: UUID): Mono<CassandraMessage>
 
     @Query("select * from cassandramessage where receiverid in (?0, ?1) and senderid in (?0, ?1)")
