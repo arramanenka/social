@@ -19,8 +19,9 @@ class CassandraMessage(
         @PrimaryKey
         var messageKey: MessageKey,
         var text: String? = null,
+        var messageId: UUID = Uuids.timeBased()
 ) {
-    fun toModel(): Message = Message(messageKey.messageId.toString(), messageKey.senderId, messageKey.receiverId, text, messageKey.createdAt)
+    fun toModel(): Message = Message(messageId.toString(), messageKey.senderId, messageKey.receiverId, text, messageKey.createdAt)
 
     constructor(message: Message) : this(
             MessageKey(senderId = message.senderId!!, receiverId = message.receiverId!!),
@@ -32,8 +33,6 @@ class CassandraMessage(
 @NoArgsConstructor
 @EqualsAndHashCode
 class MessageKey(
-        @PrimaryKeyColumn(name = "messageId", ordinal = 2, type = PrimaryKeyType.PARTITIONED)
-        var messageId: UUID = Uuids.timeBased(),
         @PrimaryKeyColumn(name = "senderId", ordinal = 0, type = PrimaryKeyType.PARTITIONED)
         var senderId: String,
         @PrimaryKeyColumn(name = "receiverId", ordinal = 1, type = PrimaryKeyType.PARTITIONED)
