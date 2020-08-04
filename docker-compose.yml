@@ -23,3 +23,8 @@ services:
     ports:
       - 27017:27017
     restart: on-failure
+  cassandra:
+    image: cassandra:latest
+    ports:
+      - "9042:9042"
+    restart: on-failure
