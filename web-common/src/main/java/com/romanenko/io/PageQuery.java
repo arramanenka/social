@@ -1,22 +1,25 @@
 package com.romanenko.io;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.reactive.function.server.ServerRequest;
 
-@RequiredArgsConstructor
 public class PageQuery {
     public final int page;
     public final int pageSize;
 
     public PageQuery(ServerRequest request) throws NumberFormatException {
-        page = request.queryParam("page")
-                .map(Integer::parseInt)
-                .filter(p -> p >= 0)
-                .orElse(0);
-        pageSize = request.queryParam("pageSize")
-                .map(Integer::parseInt)
-                .filter(p -> p >= 1)
-                .orElse(5);
+        this(
+                request.queryParam("page")
+                        .map(Integer::parseInt)
+                        .orElse(0),
+                request.queryParam("pageSize")
+                        .map(Integer::parseInt)
+                        .orElse(5)
+        );
+    }
+
+    public PageQuery(int page, int pageSize) {
+        this.page = Math.max(page, 0);
+        this.pageSize = pageSize < 1 ? 5 : pageSize;
     }
 
     public int calculateSkipAmount() {
