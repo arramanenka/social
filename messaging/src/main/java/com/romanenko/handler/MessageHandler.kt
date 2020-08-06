@@ -2,6 +2,7 @@ package com.romanenko.handler
 
 import com.romanenko.io.PageQuery
 import com.romanenko.io.ResponseSupplier
+import com.romanenko.io.safeBodyToMono
 import com.romanenko.model.Message
 import com.romanenko.routing.ApiBuilder
 import com.romanenko.routing.Routable
@@ -28,7 +29,7 @@ class MessageHandler(
     private fun sendMessage(request: ServerRequest): Mono<ServerResponse> {
         val message = identityProvider.getIdentity(request)
                 .flatMap {
-                    request.bodyToMono(Message::class.java)
+                    request.safeBodyToMono(Message::class.java)
                             .doOnNext { m ->
                                 m.senderId = it.id
                                 m.receiverId = request.pathVariable("userId")

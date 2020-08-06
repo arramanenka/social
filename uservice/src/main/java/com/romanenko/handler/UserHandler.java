@@ -15,6 +15,8 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import static com.romanenko.io.RequestExtensionsKt.safeBodyToMono;
+
 @Component
 @RequiredArgsConstructor
 public class UserHandler implements Routable {
@@ -34,10 +36,9 @@ public class UserHandler implements Routable {
     @NonNull
     private Mono<ServerResponse> saveUser(ServerRequest request) {
         return identityProvider.getIdentity(request)
-                .flatMap(e -> request.bodyToMono(User.class).doOnSuccess(u -> u.setId(e.getId())))
+                .flatMap(e -> safeBodyToMono(request, User.class).doOnSuccess(u -> u.setId(e.getId())))
                 .flatMap(userDao::saveUser)
                 .flatMap(responseSupplier::ok)
-                .onErrorResume(NullPointerException.class, e -> responseSupplier.badRequest("Incomplete request body.", e))
                 .onErrorResume(responseSupplier::error);
     }
 

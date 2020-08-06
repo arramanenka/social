@@ -30,8 +30,12 @@ class BridgedConnectionService(
         return webclient.get()
                 .uri("/permissions/{queryingUserId}/{userId}/{permissionKey}", initiatorId, otherPersonId, permissionKey.key)
                 .exchange()
-                .filter { it.statusCode().is4xxClientError }
-                .flatMap { it.bodyToMono(Permission::class.java) }
-                .switchIfEmpty(Mono.error<Permission>(HttpClientErrorException(HttpStatus.FORBIDDEN)))
+                .flatMap {
+                    val statusCode = it.statusCode()
+                    if (statusCode.isError) {
+                        return@flatMap Mono.error<Permission>(HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR))
+                    }
+                    it.bodyToMono(Permission::class.java)
+                }
     }
 }
