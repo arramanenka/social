@@ -7,7 +7,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class Launcher {
 
     public static void main(String[] args) {
-        SpringApplication.run(Launcher.class, args);
+        try {
+            SpringApplication.run(Launcher.class, args);
+        } catch (Exception ex) {
+            System.exit(1);
+        }
     }
 
 }
