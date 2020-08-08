@@ -3,15 +3,16 @@ server:
 spring:
   data:
     mongodb:
-      host: localhost
+      host: ${MONGO_HOST:localhost}
       port: 27017
       database: chat
     cassandra:
       local-datacenter: datacenter1
       keyspace-name: chat
       schema-action: create_if_not_exists
+      contact-points: ${CASSANDRA_HOST:localhost}
 uservice:
-  host: localhost
+  host: ${USERVICE_HOST:localhost}
   port: 8080
 message:
   storage: cassandra
