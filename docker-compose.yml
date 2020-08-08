@@ -23,11 +23,12 @@ services:
     ports:
       - 27017:27017
     restart: on-failure
-  cassandra:
-    image: cassandra:latest
-    ports:
-      - "9042:9042"
-    restart: on-failure
+  #  for local deployment, lets use mongo. we can switch to big guns later on
+  #  cassandra:
+  #    image: cassandra:latest
+  #    ports:
+  #      - "9042:9042"
+  #    restart: on-failure
   uservice:
     image: arramanenka/uservice:latest
     depends_on:
@@ -43,13 +44,13 @@ services:
   message_service:
     image: arramanenka/messaging:latest
     depends_on:
-      - cassandra
+      #      - cassandra
       - mongodb
       - redis
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - REDIS_HOST=redis
-      - CASSANDRA_HOST=cassandra
+      - MONGO_HOST=mongodb
       - USERVICE_HOST=uservice
     ports:
       - 8081:8081

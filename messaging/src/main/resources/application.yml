@@ -14,5 +14,3 @@ spring:
 uservice:
   host: ${USERVICE_HOST:localhost}
   port: 8080
-message:
-  storage: cassandra
