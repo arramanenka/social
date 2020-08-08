@@ -9,6 +9,7 @@ import org.redisson.Redisson;
 import org.redisson.api.RMapReactive;
 import org.redisson.api.RedissonReactiveClient;
 import org.redisson.config.Config;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -26,8 +27,13 @@ public class RedisUserConnectionCache implements UserConnectionCache {
     private final String[] collectionKeys;
 
     @SneakyThrows
-    public RedisUserConnectionCache() {
+    public RedisUserConnectionCache(
+            @Value("#{systemEnvironment['REDIS_HOST']}") String redisHost
+    ) {
         Config config = Config.fromYAML(getClass().getResource("/redisConfig.yml"));
+        if (redisHost != null) {
+            config.useSingleServer().setAddress("redis://" + redisHost + ":6379");
+        }
         this.client = Redisson.createReactive(config);
         this.connections = client.getMap("connections");
         Set<String> permissionKeysValues = Arrays.stream(PermissionKey.values()).map(PermissionKey::getKey).collect(Collectors.toSet());
