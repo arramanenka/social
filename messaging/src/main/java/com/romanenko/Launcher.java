@@ -2,8 +2,15 @@ package com.romanenko;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.data.cassandra.CassandraDataAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.cassandra.CassandraReactiveDataAutoConfiguration;
 
-@SpringBootApplication
+@SpringBootApplication(
+        exclude = {
+                CassandraDataAutoConfiguration.class,
+                CassandraReactiveDataAutoConfiguration.class
+        }
+)
 public class Launcher {
 
     public static void main(String[] args) {
