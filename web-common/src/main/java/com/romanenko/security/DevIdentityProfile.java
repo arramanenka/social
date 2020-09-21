@@ -32,6 +32,7 @@ public class DevIdentityProfile {
         source.registerCorsConfiguration("/**", configSource);
 
         http
+                .csrf().disable()
                 .cors().configurationSource(source);
         log.info("Disabled cors and csrf for dev mode");
         return http.build();
