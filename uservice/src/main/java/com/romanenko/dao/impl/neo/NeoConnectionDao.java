@@ -19,7 +19,7 @@ import reactor.core.scheduler.Schedulers;
 @RequiredArgsConstructor
 public class NeoConnectionDao implements ConnectionDao {
 
-    private final NeoConnectionRepo connectionRepo;
+    private final NeoConnectionRepository connectionRepo;
     private final DirectConnectionDao directConnectionDao;
 
     @Override
