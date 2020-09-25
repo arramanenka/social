@@ -31,14 +31,8 @@ public class NeoConnectionDao implements ConnectionDao {
             return connectionRepo.getFollowers(initiatorId, pageQuery.calculateSkipAmount(), pageQuery.pageSize)
                     .map(NeoUser::toSimpleModel);
         }
-        return directConnectionDao.getRelations(initiatorId, id)
-                .flatMapMany(connectionType -> {
-                    if (!connectionType.equals(ConnectionType.BLACKLIST)) {
-                        return connectionRepo.getFollowers(id, pageQuery.calculateSkipAmount(), pageQuery.pageSize)
-                                .map(NeoUser::toSimpleModel);
-                    }
-                    return Mono.error(new HttpClientErrorException(HttpStatus.FORBIDDEN));
-                });
+        return connectionRepo.getFollowers(id, pageQuery.calculateSkipAmount(), pageQuery.pageSize)
+                .map(NeoUser::toSimpleModel);
     }
 
     @Override
@@ -48,14 +42,8 @@ public class NeoConnectionDao implements ConnectionDao {
             return connectionRepo.getFollowing(initiatorId, pageQuery.calculateSkipAmount(), pageQuery.pageSize)
                     .map(NeoUser::toSimpleModel);
         }
-        return directConnectionDao.getRelations(initiatorId, id)
-                .flatMapMany(connectionType -> {
-                    if (!connectionType.equals(ConnectionType.BLACKLIST)) {
-                        return connectionRepo.getFollowing(id, pageQuery.calculateSkipAmount(), pageQuery.pageSize)
-                                .map(NeoUser::toSimpleModel);
-                    }
-                    return Mono.error(new HttpClientErrorException(HttpStatus.FORBIDDEN));
-                });
+        return connectionRepo.getFollowing(id, pageQuery.calculateSkipAmount(), pageQuery.pageSize)
+                .map(NeoUser::toSimpleModel);
     }
 
     @Override
