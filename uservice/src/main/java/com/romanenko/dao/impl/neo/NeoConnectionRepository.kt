@@ -75,12 +75,11 @@ skip $1 limit $2
 """)
     fun getFollowing(id: String, skipAmount: Int, amount: Int): Flux<NeoUser>
 
-    //TODO needs rewriting
     @Query("""
 match (initiator: $PRIMARY_LABEL {$ID_LABEL: $0}) with initiator
 match (followee: $PRIMARY_LABEL {$ID_LABEL: $1}) with followee, initiator
 match (initiator)-[con]->(followee)
-return con
+return type(con)
 """)
     fun getConnection(initiatorId: String, otherPersonId: String): Mono<String>
 }
