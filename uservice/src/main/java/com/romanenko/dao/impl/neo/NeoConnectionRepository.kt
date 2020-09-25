@@ -1,6 +1,7 @@
 package com.romanenko.dao.impl.neo
 
-import com.romanenko.connection.ConnectionType.*
+import com.romanenko.connection.ConnectionType.BLACKLIST_NAME
+import com.romanenko.connection.ConnectionType.FOLLOW_NAME
 import com.romanenko.dao.impl.neo.model.NeoUser
 import com.romanenko.dao.impl.neo.model.NeoUser.ID_LABEL
 import com.romanenko.dao.impl.neo.model.NeoUser.PRIMARY_LABEL
@@ -12,25 +13,27 @@ import reactor.core.publisher.Mono
 
 @Component
 interface NeoConnectionRepository : ReactiveNeo4jRepository<NeoUser, String> {
-    //TODO needs rewriting
+
     @Query("""
 match (initiator: $PRIMARY_LABEL {$ID_LABEL: $0}) with initiator
 match (folowee: $PRIMARY_LABEL {$ID_LABEL: $1}) with folowee, initiator
-merge (initiator)-[con:$CONNECTION_NAME]->(folowee)
-on create set con.$CONNECTION_TYPE_LABEL="$FOLLOW_NAME"
-on match set con.$CONNECTION_TYPE_LABEL="$FOLLOW_NAME"
+optional match (initiator)-[bl:$BLACKLIST_NAME]->(folowee)
+merge (initiator)-[con:$FOLLOW_NAME]->(folowee)
+delete bl
+return type(con)
 """)
-    fun follow(initiatorId: String, followingId: String): Mono<Void>
+    fun follow(initiatorId: String, followingId: String): Mono<String>
 
-    //TODO needs rewriting
     @Query("""
 match (initiator: $PRIMARY_LABEL {$ID_LABEL: $0}) with initiator
 match (blacklisted: $PRIMARY_LABEL {$ID_LABEL: $1}) with blacklisted, initiator
-merge (initiator)-[con:$CONNECTION_NAME]->(blacklisted)
-on create set con.$CONNECTION_TYPE_LABEL="$BLACKLIST_NAME"
-on match set con.$CONNECTION_TYPE_LABEL="$BLACKLIST_NAME"
+match (initiator)-[fl1:$FOLLOW_NAME]->(blacklisted)
+match (initiator)<-[fl2:$FOLLOW_NAME]-(blacklisted)
+delete fl1, fl2
+merge (initiator)-[con:$BLACKLIST_NAME]->(blacklisted)
+return type(con)
 """)
-    fun blacklist(initiatorId: String, blacklistedUser: String): Mono<Void>
+    fun blacklist(initiatorId: String, blacklistedUser: String): Mono<String>
 
     @Query("""
 match (initiator: $PRIMARY_LABEL {$ID_LABEL: $0}) with initiator

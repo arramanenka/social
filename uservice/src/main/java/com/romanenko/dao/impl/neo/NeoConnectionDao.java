@@ -15,6 +15,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.Objects;
+
 @Component
 @RequiredArgsConstructor
 public class NeoConnectionDao implements ConnectionDao {
@@ -63,8 +65,11 @@ public class NeoConnectionDao implements ConnectionDao {
             return Mono.error(new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Cannot follow thyself"));
         }
         return connectionRepo.follow(initiatorId, followingId)
+                .filter(Objects::nonNull)
+                .switchIfEmpty(Mono.error(new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Could not find a user to follow")))
                 .doOnSuccess(r -> directConnectionDao.recalculateRelations(initiatorId, followingId, ConnectionType.FOLLOW)
-                        .subscribeOn(Schedulers.parallel()).subscribe());
+                        .subscribeOn(Schedulers.parallel()).subscribe())
+                .then();
     }
 
     @Override
@@ -91,8 +96,11 @@ public class NeoConnectionDao implements ConnectionDao {
             return Mono.error(new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Cannot blacklist thyself"));
         }
         return connectionRepo.blacklist(initiatorId, blacklistedUser)
+                .filter(Objects::nonNull)
+                .switchIfEmpty(Mono.error(new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Could not find a user to block")))
                 .doOnSuccess(r -> directConnectionDao.recalculateRelations(initiatorId, blacklistedUser, ConnectionType.BLACKLIST)
-                        .subscribeOn(Schedulers.parallel()).subscribe());
+                        .subscribeOn(Schedulers.parallel()).subscribe())
+                .then();
     }
 
     @Override
