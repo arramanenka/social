@@ -16,7 +16,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class NeoUserDao implements UserDao {
 
-    private final NeoUserRepo userRepo;
+    private final NeoUserRepository userRepo;
 
     @Override
     public Mono<User> saveUser(User user) {
