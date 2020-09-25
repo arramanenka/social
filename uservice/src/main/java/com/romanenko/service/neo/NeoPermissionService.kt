@@ -6,6 +6,8 @@ import com.romanenko.connection.PermissionKey
 import com.romanenko.connection.UserConnectionCache
 import com.romanenko.dao.DirectConnectionDao
 import com.romanenko.service.PermissionService
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
@@ -15,6 +17,8 @@ class NeoPermissionService(
         private val directConnectionDao: DirectConnectionDao,
         private val connectionCache: UserConnectionCache
 ) : PermissionService {
+
+    private val logger: Logger = LoggerFactory.getLogger(NeoPermissionService::class.java)
 
     override fun getPermission(id: String, userId: String, permissionKey: PermissionKey): Mono<Permission> {
         return connectionCache.getPermission(id, userId, permissionKey)
@@ -26,7 +30,7 @@ class NeoPermissionService(
                 // in real world scenario, users have different settings for different types of activities.
                 // For now lets assume that you just don't have to be blocked for any type of permission key
                 .map {
-                    println("searching")
+                    logger.info("{} requested permission {} for user {}", id, permissionKey, userId)
                     if (it == ConnectionType.BLACKLIST) {
                         return@map Permission.BLOCKED
                     }
