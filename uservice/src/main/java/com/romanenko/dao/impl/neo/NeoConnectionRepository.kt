@@ -3,8 +3,8 @@ package com.romanenko.dao.impl.neo
 import com.romanenko.connection.ConnectionType.BLACKLIST_NAME
 import com.romanenko.connection.ConnectionType.FOLLOW_NAME
 import com.romanenko.dao.impl.neo.model.NeoUser
-import com.romanenko.dao.impl.neo.model.NeoUser.ID_LABEL
-import com.romanenko.dao.impl.neo.model.NeoUser.PRIMARY_LABEL
+import com.romanenko.dao.impl.neo.model.NeoUser.*
+import org.neo4j.driver.internal.value.MapValue
 import org.neo4j.springframework.data.repository.ReactiveNeo4jRepository
 import org.neo4j.springframework.data.repository.query.Query
 import org.springframework.stereotype.Component
@@ -54,7 +54,14 @@ delete con
     @Query("""
 match (initiator: $PRIMARY_LABEL {$ID_LABEL: $0}) with initiator
 match (initiator)-[:$BLACKLIST_NAME]->(blacklisted:$PRIMARY_LABEL)
-return blacklisted
+with {
+$AS_NESTED_LABEL: blacklisted
+$META_BLACKLISTED_BY_QUERYING_LABEL: true,
+$META_BLACKLISTED_QUERYING_LABEL: exists( (initiator)<-[:$BLACKLIST_NAME]-(blacklisted) ),
+$META_FOLLOWED_BY_QUERYING_LABEL: exists( (initiator)-[:$FOLLOW_NAME]->(blacklisted) ),
+$META_FOLLOWS_QUERYING_LABEL: exists( (initiator)<-[:$FOLLOW_NAME]-(blacklisted) )
+} as blacklistedAcc
+return blacklistedAcc
 skip $1 limit $2
 """)
     fun getBlacklist(id: String, skipAmount: Int, amount: Int): Flux<NeoUser>
@@ -62,10 +69,29 @@ skip $1 limit $2
     @Query("""
 match (initiator: $PRIMARY_LABEL {$ID_LABEL: $0}) with initiator
 match (initiator)<-[:$FOLLOW_NAME]-(follower:$PRIMARY_LABEL)
-return follower
+with {
+$AS_NESTED_LABEL: follower,
+$META_FOLLOWED_BY_QUERYING_LABEL: exists( (initiator)-[:$FOLLOW_NAME]->(follower) ),
+$META_FOLLOWS_QUERYING_LABEL: true
+} as followerAcc
+return followerAcc
 skip $1 limit $2
 """)
-    fun getFollowers(id: String, skipAmount: Int, amount: Int): Flux<NeoUser>
+    fun getOwnFollowers(id: String, skipAmount: Int, amount: Int): Flux<MapValue>
+
+    @Query("""
+match (queryingPerson: $PRIMARY_LABEL {$ID_LABEL: $0}), (queryedPerson: $PRIMARY_LABEL {$ID_LABEL: $1})<-[:$FOLLOW_NAME]-(follower:$PRIMARY_LABEL)
+with {
+$AS_NESTED_LABEL: follower,
+$META_BLACKLISTED_BY_QUERYING_LABEL: exists( (queryingPerson)-[:$BLACKLIST_NAME]->(follower) ),
+$META_BLACKLISTED_QUERYING_LABEL: exists( (queryingPerson)<-[:$BLACKLIST_NAME]-(follower) ),
+$META_FOLLOWED_BY_QUERYING_LABEL: exists( (queryingPerson)-[:$FOLLOW_NAME]->(follower) ),
+$META_FOLLOWS_QUERYING_LABEL: exists( (queryingPerson)<-[:$FOLLOW_NAME]-(follower) )
+} as followerAcc
+return followerAcc
+skip $2 limit $3
+""")
+    fun getFollowers(queryingPerson: String, id: String, skipAmount: Int, amount: Int): Flux<MapValue>
 
     @Query("""
 match (initiator: $PRIMARY_LABEL {$ID_LABEL: $0}) with initiator
