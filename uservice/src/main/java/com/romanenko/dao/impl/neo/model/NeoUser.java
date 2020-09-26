@@ -85,6 +85,7 @@ public class NeoUser {
         if (mapValue.containsKey(META_BLACKLISTED_BY_QUERYING_LABEL)
                 || mapValue.containsKey(META_FOLLOWED_BY_QUERYING_LABEL)
                 || mapValue.containsKey(META_FOLLOWS_QUERYING_LABEL)
+                || mapValue.containsKey(META_BLACKLISTED_QUERYING_LABEL)
         ) {
             builder.userMeta(
                     UserMeta.builder()
