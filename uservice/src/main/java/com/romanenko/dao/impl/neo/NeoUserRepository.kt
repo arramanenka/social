@@ -19,11 +19,15 @@ interface NeoUserRepository : ReactiveNeo4jRepository<NeoUser, String> {
     @Query("""
 match (queryingPerson: $PRIMARY_LABEL {$ID_LABEL: $0}) with queryingPerson
 match (person: $PRIMARY_LABEL{$ID_LABEL: $1})
-where not (person)-[:$BLACKLIST_NAME]-(queryingPerson)
 with {
 $AS_NESTED_LABEL: person,
 $FOLLOWER_AMOUNT_LABEL: size((person)-[:$FOLLOW_NAME]->()),
-$FOLLOWING_AMOUNT_LABEL: size((person)<-[:$FOLLOW_NAME}]-())
+$FOLLOWING_AMOUNT_LABEL: size((person)<-[:$FOLLOW_NAME]-()),
+
+$META_BLACKLISTED_BY_QUERYING_LABEL: exists( (queryingPerson)-[:$BLACKLIST_NAME]->(person) ),
+$META_BLACKLISTED_QUERYING_LABEL: exists( (queryingPerson)<-[:$BLACKLIST_NAME]-(person) ),
+$META_FOLLOWED_BY_QUERYING_LABEL: exists( (queryingPerson)-[:$FOLLOW_NAME]->(person) ),
+$META_FOLLOWS_QUERYING_LABEL: exists( (queryingPerson)<-[:$FOLLOW_NAME]-(person) )
 } as personAcc
 return  personAcc
 """)
@@ -34,7 +38,7 @@ match (person: $PRIMARY_LABEL{$ID_LABEL: $0})
 with {
 $AS_NESTED_LABEL: person,
 $FOLLOWER_AMOUNT_LABEL: size((person)-[:$FOLLOW_NAME]->()),
-$FOLLOWING_AMOUNT_LABEL: size((person)<-[$FOLLOW_NAME]-())
+$FOLLOWING_AMOUNT_LABEL: size((person)<-[:$FOLLOW_NAME]-())
 } as personAcc
 return  personAcc
 """)
@@ -42,10 +46,18 @@ return  personAcc
 
     @Query("""
 match (queryingPerson: $PRIMARY_LABEL {$ID_LABEL: $0}) with queryingPerson
-match (person:$PRIMARY_LABEL) where person.$NAME_LABEL starts with $1 AND not (person)-[:$BLACKLIST_NAME]-(queryingPerson)
-return person
+match (person:$PRIMARY_LABEL) where person.$NAME_LABEL starts with $1
+with {
+$AS_NESTED_LABEL: person,
+
+$META_BLACKLISTED_BY_QUERYING_LABEL: exists( (queryingPerson)-[:$BLACKLIST_NAME]->(person) ),
+$META_BLACKLISTED_QUERYING_LABEL: exists( (queryingPerson)<-[:$BLACKLIST_NAME]-(person) ),
+$META_FOLLOWED_BY_QUERYING_LABEL: exists( (queryingPerson)-[:$FOLLOW_NAME]->(person) ),
+$META_FOLLOWS_QUERYING_LABEL: exists( (queryingPerson)<-[:$FOLLOW_NAME]-(person) )
+} as personAcc
+return personAcc
 skip $2 
 limit $3
 """)
-    fun getAllByNickBeginning(id: String, nickStart: String, skipAmount: Int, amount: Int): Flux<NeoUser>
+    fun findAllByNick(id: String, nickStart: String, skipAmount: Int, amount: Int): Flux<MapValue>
 }

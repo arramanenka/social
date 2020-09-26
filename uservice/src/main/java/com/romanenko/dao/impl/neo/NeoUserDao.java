@@ -31,8 +31,8 @@ public class NeoUserDao implements UserDao {
 
     @Override
     public Flux<User> getAllByNickBeginning(Identity queryingIdentity, String nickStart, PageQuery pageQuery) {
-        return userRepo.getAllByNickBeginning(queryingIdentity.getId(), nickStart, pageQuery.calculateSkipAmount(), pageQuery.pageSize)
-                .map(NeoUser::toSimpleModel);
+        return userRepo.findAllByNick(queryingIdentity.getId(), nickStart, pageQuery.calculateSkipAmount(), pageQuery.pageSize)
+                .map(NeoUser::convertSimpleProfile);
     }
 
     @Override

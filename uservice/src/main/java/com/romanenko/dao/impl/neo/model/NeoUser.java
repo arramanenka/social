@@ -1,6 +1,7 @@
 package com.romanenko.dao.impl.neo.model;
 
 import com.romanenko.model.User;
+import com.romanenko.model.UserMeta;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,6 +23,12 @@ public class NeoUser {
     public static final String AS_NESTED_LABEL = "neoUser";
     public static final String FOLLOWER_AMOUNT_LABEL = "followers";
     public static final String FOLLOWING_AMOUNT_LABEL = "following";
+
+    public static final String META_BLACKLISTED_BY_QUERYING_LABEL = "q_blocked";
+    public static final String META_BLACKLISTED_QUERYING_LABEL = "blocked_q";
+    public static final String META_FOLLOWED_BY_QUERYING_LABEL = "q_follows";
+    public static final String META_FOLLOWS_QUERYING_LABEL = "follows_q";
+
     public static final String PRIMARY_LABEL = "app_user";
     public static final String NAME_LABEL = "name";
     public static final String AVATAR_LABEL = "avatar";
@@ -57,7 +64,37 @@ public class NeoUser {
         }
         builder.followersAmount(mapValue.get(FOLLOWER_AMOUNT_LABEL, 0))
                 .followingAmount(mapValue.get(FOLLOWING_AMOUNT_LABEL, 0));
+        updateMeta(mapValue, builder);
         return builder.build();
+    }
+
+    public static User convertSimpleProfile(MapValue mapValue) {
+        var builder = User.builder();
+        Value neoUser = mapValue.get(AS_NESTED_LABEL);
+        if (!neoUser.isNull()) {
+            builder
+                    .name(neoUser.get(NAME_LABEL).asString(null))
+                    .id(neoUser.get(ID_LABEL).asString(null))
+                    .avatarUrl(neoUser.get(AVATAR_LABEL).asString(null));
+        }
+        updateMeta(mapValue, builder);
+        return builder.build();
+    }
+
+    private static void updateMeta(MapValue mapValue, User.UserBuilder builder) {
+        if (mapValue.containsKey(META_BLACKLISTED_BY_QUERYING_LABEL)
+                || mapValue.containsKey(META_FOLLOWED_BY_QUERYING_LABEL)
+                || mapValue.containsKey(META_FOLLOWS_QUERYING_LABEL)
+        ) {
+            builder.userMeta(
+                    UserMeta.builder()
+                            .isFollowingQueryingPerson(mapValue.get(META_FOLLOWS_QUERYING_LABEL, false))
+                            .isFollowedByQueryingPerson(mapValue.get(META_FOLLOWED_BY_QUERYING_LABEL, false))
+                            .isBlacklistedByQueryingPerson(mapValue.get(META_BLACKLISTED_BY_QUERYING_LABEL, false))
+                            .isQueryingPersonBlacklisted(mapValue.get(META_BLACKLISTED_QUERYING_LABEL, false))
+                            .build()
+            );
+        }
     }
 
     public User toSimpleModel() {

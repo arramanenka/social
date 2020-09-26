@@ -18,4 +18,5 @@ public class User {
     private String bio;
     private int followersAmount;
     private int followingAmount;
+    private UserMeta userMeta;
 }
