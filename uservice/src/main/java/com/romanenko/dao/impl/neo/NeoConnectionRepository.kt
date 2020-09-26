@@ -94,12 +94,30 @@ skip $2 limit $3
     fun getFollowers(queryingPerson: String, id: String, skipAmount: Int, amount: Int): Flux<MapValue>
 
     @Query("""
-match (initiator: $PRIMARY_LABEL {$ID_LABEL: $0}) with initiator
-match (initiator)-[:$FOLLOW_NAME]->(following:$PRIMARY_LABEL)
-return following
+match (queryingPerson: $PRIMARY_LABEL {$ID_LABEL: $0}), (queryingPerson)-[:$FOLLOW_NAME]->(following:$PRIMARY_LABEL)
+with {
+$AS_NESTED_LABEL: following,
+$META_FOLLOWED_BY_QUERYING_LABEL: true,
+$META_FOLLOWS_QUERYING_LABEL: exists( (queryingPerson)<-[:$FOLLOW_NAME]-(following) )
+} as followingAcc
+return followingAcc
 skip $1 limit $2
 """)
-    fun getFollowing(id: String, skipAmount: Int, amount: Int): Flux<NeoUser>
+    fun getOwnFollowing(id: String, skipAmount: Int, amount: Int): Flux<MapValue>
+
+    @Query("""
+match (queryingPerson: $PRIMARY_LABEL {$ID_LABEL: $0}), (queryedPerson: $PRIMARY_LABEL {$ID_LABEL: $1})-[:$FOLLOW_NAME]->(following:$PRIMARY_LABEL)
+with {
+$AS_NESTED_LABEL: following,
+$META_BLACKLISTED_BY_QUERYING_LABEL: exists( (queryingPerson)-[:$BLACKLIST_NAME]->(following) ),
+$META_BLACKLISTED_QUERYING_LABEL: exists( (queryingPerson)<-[:$BLACKLIST_NAME]-(following) ),
+$META_FOLLOWED_BY_QUERYING_LABEL: exists( (queryingPerson)-[:$FOLLOW_NAME]->(following) ),
+$META_FOLLOWS_QUERYING_LABEL: exists( (queryingPerson)<-[:$FOLLOW_NAME]-(following) )
+} as followingAcc
+return followingAcc
+skip $2 limit $3
+""")
+    fun getFollowing(queryingPerson: String, id: String, skipAmount: Int, amount: Int): Flux<MapValue>
 
     @Query("""
 match (initiator: $PRIMARY_LABEL {$ID_LABEL: $0}) with initiator

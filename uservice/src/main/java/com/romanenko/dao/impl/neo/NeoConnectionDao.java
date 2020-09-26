@@ -39,11 +39,11 @@ public class NeoConnectionDao implements ConnectionDao {
     public Flux<User> getFollowedByUser(Identity initiator, String id, PageQuery pageQuery) {
         String initiatorId = initiator.getId();
         if (initiatorId.equals(id)) {
-            return connectionRepo.getFollowing(initiatorId, pageQuery.calculateSkipAmount(), pageQuery.pageSize)
-                    .map(NeoUser::toSimpleModel);
+            return connectionRepo.getOwnFollowing(initiatorId, pageQuery.calculateSkipAmount(), pageQuery.pageSize)
+                    .map(NeoUser::convertSimpleProfile);
         }
-        return connectionRepo.getFollowing(id, pageQuery.calculateSkipAmount(), pageQuery.pageSize)
-                .map(NeoUser::toSimpleModel);
+        return connectionRepo.getFollowing(initiatorId, id, pageQuery.calculateSkipAmount(), pageQuery.pageSize)
+                .map(NeoUser::convertSimpleProfile);
     }
 
     @Override
