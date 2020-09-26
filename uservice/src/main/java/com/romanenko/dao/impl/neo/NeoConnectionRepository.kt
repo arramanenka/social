@@ -15,8 +15,8 @@ import reactor.core.publisher.Mono
 interface NeoConnectionRepository : ReactiveNeo4jRepository<NeoUser, String> {
 
     @Query("""
-match (initiator: $PRIMARY_LABEL {$ID_LABEL: $0}) with initiator
-match (folowee: $PRIMARY_LABEL {$ID_LABEL: $1}) with folowee, initiator
+match (initiator: $PRIMARY_LABEL {$ID_LABEL: $0})
+match (folowee: $PRIMARY_LABEL {$ID_LABEL: $1})
 optional match (initiator)-[bl:$BLACKLIST_NAME]->(folowee)
 merge (initiator)-[con:$FOLLOW_NAME]->(folowee)
 delete bl
@@ -25,10 +25,10 @@ return type(con)
     fun follow(initiatorId: String, followingId: String): Mono<String>
 
     @Query("""
-match (initiator: $PRIMARY_LABEL {$ID_LABEL: $0}) with initiator
-match (blacklisted: $PRIMARY_LABEL {$ID_LABEL: $1}) with blacklisted, initiator
-match (initiator)-[fl1:$FOLLOW_NAME]->(blacklisted)
-match (initiator)<-[fl2:$FOLLOW_NAME]-(blacklisted)
+match (initiator: $PRIMARY_LABEL {$ID_LABEL: $0})
+match (blacklisted: $PRIMARY_LABEL {$ID_LABEL: $1})
+optional match (initiator)-[fl1:$FOLLOW_NAME]->(blacklisted)
+optional match (initiator)<-[fl2:$FOLLOW_NAME]-(blacklisted)
 delete fl1, fl2
 merge (initiator)-[con:$BLACKLIST_NAME]->(blacklisted)
 return type(con)
@@ -36,23 +36,23 @@ return type(con)
     fun blacklist(initiatorId: String, blacklistedUser: String): Mono<String>
 
     @Query("""
-match (initiator: $PRIMARY_LABEL {$ID_LABEL: $0}) with initiator
-match (folowee: $PRIMARY_LABEL {$ID_LABEL: $1}) with folowee, initiator
+match (initiator: $PRIMARY_LABEL {$ID_LABEL: $0})
+match (folowee: $PRIMARY_LABEL {$ID_LABEL: $1})
 match (initiator)-[con:$FOLLOW_NAME]->(folowee)
 delete con
 """)
     fun unfollow(initiatorId: String, followingId: String): Mono<Void>
 
     @Query("""
-match (initiator: $PRIMARY_LABEL {$ID_LABEL: $0}) with initiator
-match (blacklisted: $PRIMARY_LABEL {$ID_LABEL: $1}) with blacklisted, initiator
+match (initiator: $PRIMARY_LABEL {$ID_LABEL: $0})
+match (blacklisted: $PRIMARY_LABEL {$ID_LABEL: $1})
 match (initiator)-[con:$BLACKLIST_NAME]->(blacklisted)
 delete con
 """)
     fun removeFromBlacklist(initiatorId: String, blacklistedUser: String): Mono<Void>
 
     @Query("""
-match (initiator: $PRIMARY_LABEL {$ID_LABEL: $0}) with initiator
+match (initiator: $PRIMARY_LABEL {$ID_LABEL: $0})
 match (initiator)-[:$BLACKLIST_NAME]->(blacklisted:$PRIMARY_LABEL)
 with {
 $AS_NESTED_LABEL: blacklisted
@@ -67,7 +67,7 @@ skip $1 limit $2
     fun getBlacklist(id: String, skipAmount: Int, amount: Int): Flux<NeoUser>
 
     @Query("""
-match (initiator: $PRIMARY_LABEL {$ID_LABEL: $0}) with initiator
+match (initiator: $PRIMARY_LABEL {$ID_LABEL: $0})
 match (initiator)<-[:$FOLLOW_NAME]-(follower:$PRIMARY_LABEL)
 with {
 $AS_NESTED_LABEL: follower,
@@ -80,7 +80,8 @@ skip $1 limit $2
     fun getOwnFollowers(id: String, skipAmount: Int, amount: Int): Flux<MapValue>
 
     @Query("""
-match (queryingPerson: $PRIMARY_LABEL {$ID_LABEL: $0}), (queryedPerson: $PRIMARY_LABEL {$ID_LABEL: $1})<-[:$FOLLOW_NAME]-(follower:$PRIMARY_LABEL)
+match (queryingPerson: $PRIMARY_LABEL {$ID_LABEL: $0})
+match (queryedPerson: $PRIMARY_LABEL {$ID_LABEL: $1})<-[:$FOLLOW_NAME]-(follower:$PRIMARY_LABEL)
 with {
 $AS_NESTED_LABEL: follower,
 $META_BLACKLISTED_BY_QUERYING_LABEL: exists( (queryingPerson)-[:$BLACKLIST_NAME]->(follower) ),
@@ -94,7 +95,8 @@ skip $2 limit $3
     fun getFollowers(queryingPerson: String, id: String, skipAmount: Int, amount: Int): Flux<MapValue>
 
     @Query("""
-match (queryingPerson: $PRIMARY_LABEL {$ID_LABEL: $0}), (queryingPerson)-[:$FOLLOW_NAME]->(following:$PRIMARY_LABEL)
+match (queryingPerson: $PRIMARY_LABEL {$ID_LABEL: $0})
+match (queryingPerson)-[:$FOLLOW_NAME]->(following:$PRIMARY_LABEL)
 with {
 $AS_NESTED_LABEL: following,
 $META_FOLLOWED_BY_QUERYING_LABEL: true,
@@ -106,7 +108,8 @@ skip $1 limit $2
     fun getOwnFollowing(id: String, skipAmount: Int, amount: Int): Flux<MapValue>
 
     @Query("""
-match (queryingPerson: $PRIMARY_LABEL {$ID_LABEL: $0}), (queryedPerson: $PRIMARY_LABEL {$ID_LABEL: $1})-[:$FOLLOW_NAME]->(following:$PRIMARY_LABEL)
+match (queryingPerson: $PRIMARY_LABEL {$ID_LABEL: $0})
+match (queryedPerson: $PRIMARY_LABEL {$ID_LABEL: $1})-[:$FOLLOW_NAME]->(following:$PRIMARY_LABEL)
 with {
 $AS_NESTED_LABEL: following,
 $META_BLACKLISTED_BY_QUERYING_LABEL: exists( (queryingPerson)-[:$BLACKLIST_NAME]->(following) ),
@@ -120,8 +123,8 @@ skip $2 limit $3
     fun getFollowing(queryingPerson: String, id: String, skipAmount: Int, amount: Int): Flux<MapValue>
 
     @Query("""
-match (initiator: $PRIMARY_LABEL {$ID_LABEL: $0}) with initiator
-match (followee: $PRIMARY_LABEL {$ID_LABEL: $1}) with followee, initiator
+match (initiator: $PRIMARY_LABEL {$ID_LABEL: $0})
+match (followee: $PRIMARY_LABEL {$ID_LABEL: $1})
 match (initiator)-[con]->(followee)
 return type(con)
 """)
