@@ -10,12 +10,10 @@ public enum ConnectionType {
     BLACKLIST(ConnectionType.BLACKLIST_NAME, 0),
 
     ;
-    public static final String NONE_NAME = "none";
-    public static final String CONNECTION_NAME = "USER_CONNECTION";
-    public static final String CONNECTION_TYPE_LABEL = "type";
-    public static final String FOLLOW_NAME = "follow";
-    public static final String BLACKLIST_NAME = "blacklist";
-    public static final String FRIEND_NAME = "friend";
+    public static final String NONE_NAME = "NONE";
+    public static final String FOLLOW_NAME = "FOLLOW";
+    public static final String BLACKLIST_NAME = "BLACKLIST";
+    public static final String FRIEND_NAME = "FRIEND";
     public final String name;
     private final int numberRepresentation;
 

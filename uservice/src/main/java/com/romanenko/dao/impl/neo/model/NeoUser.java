@@ -16,6 +16,11 @@ import org.neo4j.springframework.data.core.schema.Property;
 @AllArgsConstructor
 @NoArgsConstructor
 public class NeoUser {
+    public static final String PRIMARY_LABEL = "app_user";
+    public static final String NAME_LABEL = "name";
+    public static final String AVATAR_LABEL = "avatar";
+    public static final String ID_LABEL = "puId";
+    public static final String BIO_LABEL = "bio";
     /**
      * Since @QueryResult is not supported in current version of neo4j rx, there are some workarounds, including this.
      * In future, for easier migration to proper method, let's save this nested label
@@ -28,12 +33,6 @@ public class NeoUser {
     public static final String META_BLACKLISTED_QUERYING_LABEL = "blocked_q";
     public static final String META_FOLLOWED_BY_QUERYING_LABEL = "q_follows";
     public static final String META_FOLLOWS_QUERYING_LABEL = "follows_q";
-
-    public static final String PRIMARY_LABEL = "app_user";
-    public static final String NAME_LABEL = "name";
-    public static final String AVATAR_LABEL = "avatar";
-    public static final String ID_LABEL = "puId";
-    public static final String BIO_LABEL = "bio";
 
     @Property(name = NAME_LABEL)
     private String name;
