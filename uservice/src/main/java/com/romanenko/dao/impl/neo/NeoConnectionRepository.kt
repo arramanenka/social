@@ -55,7 +55,7 @@ delete con
 match (initiator: $PRIMARY_LABEL {$ID_LABEL: $0})
 match (initiator)-[:$BLACKLIST_NAME]->(blacklisted:$PRIMARY_LABEL)
 with {
-$AS_NESTED_LABEL: blacklisted
+$AS_NESTED_LABEL: blacklisted,
 $META_BLACKLISTED_BY_QUERYING_LABEL: true,
 $META_BLACKLISTED_QUERYING_LABEL: exists( (initiator)<-[:$BLACKLIST_NAME]-(blacklisted) ),
 $META_FOLLOWED_BY_QUERYING_LABEL: exists( (initiator)-[:$FOLLOW_NAME]->(blacklisted) ),
@@ -64,7 +64,7 @@ $META_FOLLOWS_QUERYING_LABEL: exists( (initiator)<-[:$FOLLOW_NAME]-(blacklisted)
 return blacklistedAcc
 skip $1 limit $2
 """)
-    fun getBlacklist(id: String, skipAmount: Int, amount: Int): Flux<NeoUser>
+    fun getBlacklist(id: String, skipAmount: Int, amount: Int): Flux<MapValue>
 
     @Query("""
 match (initiator: $PRIMARY_LABEL {$ID_LABEL: $0})

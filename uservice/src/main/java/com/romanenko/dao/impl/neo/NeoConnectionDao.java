@@ -74,7 +74,7 @@ public class NeoConnectionDao implements ConnectionDao {
     @Override
     public Flux<User> getBlacklist(Identity identity, PageQuery pageQuery) {
         return connectionRepo.getBlacklist(identity.getId(), pageQuery.calculateSkipAmount(), pageQuery.pageSize)
-                .map(NeoUser::toSimpleModel);
+                .map(NeoUser::convertSimpleProfile);
     }
 
     @Override
