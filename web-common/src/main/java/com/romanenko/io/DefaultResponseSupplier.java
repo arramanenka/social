@@ -41,7 +41,7 @@ public class DefaultResponseSupplier implements ResponseSupplier {
     @Override
     public <T> Mono<ServerResponse> ok(Flux<T> flux, Class<T> clazz) {
         return ServerResponse.ok()
-                .contentType(MediaType.APPLICATION_STREAM_JSON)
+                .contentType(MediaType.TEXT_EVENT_STREAM)
                 .body(flux, clazz);
     }
 
