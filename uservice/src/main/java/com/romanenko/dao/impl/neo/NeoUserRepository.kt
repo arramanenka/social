@@ -21,8 +21,8 @@ match (queryingPerson: $PRIMARY_LABEL {$ID_LABEL: $0}) with queryingPerson
 match (person: $PRIMARY_LABEL{$ID_LABEL: $1})
 with {
 $AS_NESTED_LABEL: person,
-$FOLLOWER_AMOUNT_LABEL: size((person)-[:$FOLLOW_NAME]->()),
-$FOLLOWING_AMOUNT_LABEL: size((person)<-[:$FOLLOW_NAME]-()),
+$FOLLOWER_AMOUNT_LABEL: size((person)<-[:$FOLLOW_NAME]-()),
+$FOLLOWING_AMOUNT_LABEL: size((person)-[:$FOLLOW_NAME]->()),
 
 $META_BLACKLISTED_BY_QUERYING_LABEL: exists( (queryingPerson)-[:$BLACKLIST_NAME]->(person) ),
 $META_BLACKLISTED_QUERYING_LABEL: exists( (queryingPerson)<-[:$BLACKLIST_NAME]-(person) ),
