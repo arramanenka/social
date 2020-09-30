@@ -33,7 +33,7 @@ public class DevIdentityProfile {
         @Override
         public void addCorsMappings(CorsRegistry registry) {
             registry.addMapping("/**")
-                    .allowedMethods("PUT", "GET", "POST")
+                    .allowedMethods("PUT", "GET", "POST", "DELETE")
                     .maxAge(3600);
         }
     }
