@@ -37,8 +37,8 @@ return  personAcc
 match (person: $PRIMARY_LABEL{$ID_LABEL: $0})
 with {
 $AS_NESTED_LABEL: person,
-$FOLLOWER_AMOUNT_LABEL: size((person)-[:$FOLLOW_NAME]->()),
-$FOLLOWING_AMOUNT_LABEL: size((person)<-[:$FOLLOW_NAME]-())
+$FOLLOWER_AMOUNT_LABEL: size((person)<-[:$FOLLOW_NAME]-()),
+$FOLLOWING_AMOUNT_LABEL: size((person)-[:$FOLLOW_NAME]->())
 } as personAcc
 return  personAcc
 """)
