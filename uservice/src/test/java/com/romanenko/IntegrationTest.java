@@ -1,6 +1,7 @@
 package com.romanenko;
 
 import com.romanenko.connection.UserConnectionCache;
+import com.romanenko.model.User;
 import com.romanenko.security.IdentityProvider;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -26,9 +27,9 @@ import static org.mockito.ArgumentMatchers.any;
 @SpringBootTest
 @AutoConfigureWebTestClient
 @EnableAutoConfiguration(exclude = ReactiveSecurityAutoConfiguration.class)
-@ContextConfiguration(initializers = UserHandlerTest.Initializer.class)
+@ContextConfiguration(initializers = IntegrationTest.Initializer.class)
 @Testcontainers
-public class UserHandlerTest {
+public class IntegrationTest {
     @Container
     private static final Neo4jContainer<?> neo4jContainer = new Neo4jContainer<>(DockerImageName.parse("neo4j:4.1.1"));
     @Autowired
@@ -39,10 +40,41 @@ public class UserHandlerTest {
     private IdentityProvider identityProvider;
 
     @Test
-    public void t() {
-        Mockito.when(identityProvider.getIdentity(any())).thenReturn(Mono.just(() -> "id"));
+    public void testSaveRetrieve() {
+        final var testId = "testUserId";
+        Mockito.when(identityProvider.getIdentity(any())).thenReturn(Mono.just(() -> testId));
+        User user = User.builder()
+                .name("alex123")
+                .bio("Smth about myself")
+                .build();
+        webClient.post()
+                .uri("/user")
+                .bodyValue(user)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("id").isEqualTo(testId)
+                .jsonPath("bio").isEqualTo(user.getBio())
+                .jsonPath("name").isEqualTo(user.getName());
+
         webClient.get()
-                .uri("/users/nickname/a?id=a").exchange().expectStatus().isOk();
+                .uri("/user/" + testId)
+                .exchange()
+                .expectBody()
+                .jsonPath("id").isEqualTo(testId)
+                .jsonPath("bio").isEqualTo(user.getBio())
+                .jsonPath("name").isEqualTo(user.getName())
+                .jsonPath("followersAmount").isEqualTo(0)
+                .jsonPath("followingAmount").isEqualTo(0);
+        webClient.delete()
+                .uri("/user")
+                .exchange()
+                .expectStatus().isOk();
+        webClient.get()
+                .uri("/user/" + testId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody().isEmpty();
     }
 
     static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
