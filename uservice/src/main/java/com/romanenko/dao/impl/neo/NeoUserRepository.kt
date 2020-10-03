@@ -14,6 +14,10 @@ import reactor.core.publisher.Mono
 @Component
 interface NeoUserRepository : ReactiveNeo4jRepository<NeoUser, String> {
 
+    @Query("""
+match (u: $PRIMARY_LABEL {$ID_LABEL: $0})
+detach delete u
+    """)
     fun deleteByPuId(puId: String): Mono<Boolean>
 
     @Query("""
