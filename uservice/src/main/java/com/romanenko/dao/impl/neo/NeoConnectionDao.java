@@ -28,10 +28,10 @@ public class NeoConnectionDao implements ConnectionDao {
     public Flux<User> getFollowersOfUser(Identity initiator, String id, PageQuery pageQuery) {
         String initiatorId = initiator.getId();
         if (initiatorId.equals(id)) {
-            return connectionRepo.getOwnFollowers(initiatorId, pageQuery.calculateSkipAmount(), pageQuery.pageSize)
+            return connectionRepo.getOwnFollowers(initiatorId, pageQuery.calculateSkipAmount(), pageQuery.amount)
                     .map(NeoUser::convertSimpleProfile);
         }
-        return connectionRepo.getFollowers(initiatorId, id, pageQuery.calculateSkipAmount(), pageQuery.pageSize)
+        return connectionRepo.getFollowers(initiatorId, id, pageQuery.calculateSkipAmount(), pageQuery.amount)
                 .map(NeoUser::convertSimpleProfile);
     }
 
@@ -39,10 +39,10 @@ public class NeoConnectionDao implements ConnectionDao {
     public Flux<User> getFollowedByUser(Identity initiator, String id, PageQuery pageQuery) {
         String initiatorId = initiator.getId();
         if (initiatorId.equals(id)) {
-            return connectionRepo.getOwnFollowing(initiatorId, pageQuery.calculateSkipAmount(), pageQuery.pageSize)
+            return connectionRepo.getOwnFollowing(initiatorId, pageQuery.calculateSkipAmount(), pageQuery.amount)
                     .map(NeoUser::convertSimpleProfile);
         }
-        return connectionRepo.getFollowing(initiatorId, id, pageQuery.calculateSkipAmount(), pageQuery.pageSize)
+        return connectionRepo.getFollowing(initiatorId, id, pageQuery.calculateSkipAmount(), pageQuery.amount)
                 .map(NeoUser::convertSimpleProfile);
     }
 
@@ -73,7 +73,7 @@ public class NeoConnectionDao implements ConnectionDao {
 
     @Override
     public Flux<User> getBlacklist(Identity identity, PageQuery pageQuery) {
-        return connectionRepo.getBlacklist(identity.getId(), pageQuery.calculateSkipAmount(), pageQuery.pageSize)
+        return connectionRepo.getBlacklist(identity.getId(), pageQuery.calculateSkipAmount(), pageQuery.amount)
                 .map(NeoUser::convertSimpleProfile);
     }
 

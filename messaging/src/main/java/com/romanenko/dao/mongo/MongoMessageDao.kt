@@ -33,7 +33,7 @@ class MongoMessageDao(
     }
 
     override fun getMessages(queryingPerson: String, userId: String, pageQuery: PageQuery): Flux<Message> {
-        val pageable = PageRequest.of(pageQuery.page, pageQuery.pageSize, Sort.by(Sort.Direction.DESC, "createdAt"))
+        val pageable = PageRequest.of(pageQuery.calculatePage(), pageQuery.amount, Sort.by(Sort.Direction.DESC, "createdAt"))
         return messageRepo.findAllMessagesBetweenUsers(queryingPerson, userId, pageable)
                 .map { it.toModel() }
     }
