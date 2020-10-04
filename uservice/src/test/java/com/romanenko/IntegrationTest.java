@@ -3,6 +3,7 @@ package com.romanenko;
 import com.romanenko.connection.UserConnectionCache;
 import com.romanenko.model.User;
 import com.romanenko.security.IdentityProvider;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,13 @@ public class IntegrationTest {
     private UserConnectionCache connectionCache;
     @MockBean
     private IdentityProvider identityProvider;
+
+    private final User queryingUser = User.builder().build();
+
+    @BeforeEach
+    public void befE() {
+        Mockito.when(identityProvider.getIdentity(any())).thenReturn(Mono.just(queryingUser::getId));
+    }
 
     @Test
     public void testSaveRetrieve() {
@@ -85,24 +93,21 @@ public class IntegrationTest {
     @Test
     // Oh, almighty Satan, may I be forgiven for this abomination of test
     public void testNicknameRetrieve() {
-        var user = User.builder()
-                .name("a")
-                .id("1a")
-                .build();
-        Mockito.when(identityProvider.getIdentity(any())).thenReturn(Mono.just(user::getId));
-        saveUser(user);
+        queryingUser.setName("a");
+        queryingUser.setId("1a");
+        saveUser(queryingUser);
 
-        user.setName("aa");
-        user.setId("1b");
-        saveUser(user);
+        queryingUser.setName("aa");
+        queryingUser.setId("1b");
+        saveUser(queryingUser);
 
-        user.setName("aaa");
-        user.setId("1c");
-        saveUser(user);
+        queryingUser.setName("aaa");
+        queryingUser.setId("1c");
+        saveUser(queryingUser);
 
-        user.setName("ea");
-        user.setId("1e");
-        saveUser(user);
+        queryingUser.setName("ea");
+        queryingUser.setId("1e");
+        saveUser(queryingUser);
 
         var expectedNames = new ArrayList<>() {{
             add("a");
@@ -123,6 +128,11 @@ public class IntegrationTest {
                 .expectNextMatches(u -> expectedNames.remove(u.getName()))
                 .expectNextMatches(u -> expectedNames.remove(u.getName()))
                 .verifyComplete();
+    }
+
+    @Test
+    public void testFollowingConnectionCountsAndRetrieval() {
+
     }
 
     private void saveUser(User user) {
