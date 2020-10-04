@@ -2,6 +2,7 @@ package com.romanenko;
 
 import com.romanenko.connection.UserConnectionCache;
 import com.romanenko.model.User;
+import com.romanenko.model.UserMeta;
 import com.romanenko.security.IdentityProvider;
 import lombok.extern.log4j.Log4j2;
 import org.junit.Assert;
@@ -155,12 +156,44 @@ public class IntegrationTest {
         // 2a <-FOLLOW- 2d
         follow("2d", "2a");
         log.info("Added follow connections");
+        //<editor-fold desc="A's connections">
         getVerifyUserFollowingAndFollowers(
                 User.builder().id("2a").followingAmount(2).followersAmount(2).build(),
                 "2a",
                 new String[]{"2d", "2c"},
                 new String[]{"2b", "2c"}
         );
+        getVerifyUserFollowingAndFollowers(
+                User.builder().id("2a").followingAmount(2).followersAmount(2).userMeta(
+                        UserMeta.builder().isFollowingQueryingPerson(true).build()
+                ).build(),
+                "2b",
+                new String[]{"2d", "2c"},
+                new String[]{"2b", "2c"}
+        );
+        getVerifyUserFollowingAndFollowers(
+                User.builder().id("2a").followingAmount(2).followersAmount(2).userMeta(
+                        UserMeta.builder().isFollowingQueryingPerson(true).isFollowedByQueryingPerson(true).build()
+                ).build(),
+                "2c",
+                new String[]{"2d", "2c"},
+                new String[]{"2b", "2c"}
+        );
+        getVerifyUserFollowingAndFollowers(
+                User.builder().id("2a").followingAmount(2).followersAmount(2).userMeta(
+                        UserMeta.builder().isFollowedByQueryingPerson(true).build()
+                ).build(),
+                "2d",
+                new String[]{"2d", "2c"},
+                new String[]{"2b", "2c"}
+        );
+        getVerifyUserFollowingAndFollowers(
+                User.builder().id("2a").followingAmount(2).followersAmount(2).userMeta(UserMeta.builder().build()).build(),
+                "2e",
+                new String[]{"2d", "2c"},
+                new String[]{"2b", "2c"}
+        );
+        //</editor-fold>
         log.info("Verified 2a's connections");
         getVerifyUserFollowingAndFollowers(
                 User.builder().id("2b").followingAmount(0).followersAmount(1).build(),
