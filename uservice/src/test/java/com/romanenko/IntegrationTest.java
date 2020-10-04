@@ -45,17 +45,17 @@ public class IntegrationTest {
     @MockBean
     private IdentityProvider identityProvider;
 
-    private final User queryingUser = User.builder().build();
+    private User queryingUser;
 
     @BeforeEach
-    public void befE() {
+    public void setUp() {
+        queryingUser = User.builder().build();
         Mockito.when(identityProvider.getIdentity(any())).thenReturn(Mono.just(queryingUser::getId));
     }
 
     @Test
     public void testSaveRetrieve() {
-        final var testId = "0testId";
-        Mockito.when(identityProvider.getIdentity(any())).thenReturn(Mono.just(() -> testId));
+        queryingUser.setId("0testId");
         User user = User.builder()
                 .name("alex123")
                 .bio("Smth about myself")
@@ -66,15 +66,15 @@ public class IntegrationTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("id").isEqualTo(testId)
+                .jsonPath("id").isEqualTo(queryingUser.getId())
                 .jsonPath("bio").isEqualTo(user.getBio())
                 .jsonPath("name").isEqualTo(user.getName());
 
         webClient.get()
-                .uri("/user/" + testId)
+                .uri("/user/" + queryingUser.getId())
                 .exchange()
                 .expectBody()
-                .jsonPath("id").isEqualTo(testId)
+                .jsonPath("id").isEqualTo(queryingUser.getId())
                 .jsonPath("bio").isEqualTo(user.getBio())
                 .jsonPath("name").isEqualTo(user.getName())
                 .jsonPath("followersAmount").isEqualTo(0)
@@ -84,7 +84,7 @@ public class IntegrationTest {
                 .exchange()
                 .expectStatus().isOk();
         webClient.get()
-                .uri("/user/" + testId)
+                .uri("/user/" + queryingUser.getId())
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody().isEmpty();
