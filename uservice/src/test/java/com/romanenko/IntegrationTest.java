@@ -30,6 +30,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -156,44 +157,18 @@ public class IntegrationTest {
         // 2a <-FOLLOW- 2d
         follow("2d", "2a");
         log.info("Added follow connections");
-        //<editor-fold desc="A's connections">
-        getVerifyUserFollowingAndFollowers(
-                User.builder().id("2a").followingAmount(2).followersAmount(2).build(),
-                "2a",
+        var metaMap = new HashMap<String, UserMeta>();
+        metaMap.put("2a", null);
+        metaMap.put("2b", UserMeta.builder().isFollowingQueryingPerson(true).build());
+        metaMap.put("2c", UserMeta.builder().isFollowingQueryingPerson(true).isFollowedByQueryingPerson(true).build());
+        metaMap.put("2d", UserMeta.builder().isFollowedByQueryingPerson(true).build());
+        metaMap.put("2e", UserMeta.builder().build());
+        metaMap.forEach((key, value) -> getVerifyUserFollowingAndFollowers(
+                User.builder().id("2a").followingAmount(2).followersAmount(2).userMeta(value).build(),
+                key,
                 new String[]{"2d", "2c"},
                 new String[]{"2b", "2c"}
-        );
-        getVerifyUserFollowingAndFollowers(
-                User.builder().id("2a").followingAmount(2).followersAmount(2).userMeta(
-                        UserMeta.builder().isFollowingQueryingPerson(true).build()
-                ).build(),
-                "2b",
-                new String[]{"2d", "2c"},
-                new String[]{"2b", "2c"}
-        );
-        getVerifyUserFollowingAndFollowers(
-                User.builder().id("2a").followingAmount(2).followersAmount(2).userMeta(
-                        UserMeta.builder().isFollowingQueryingPerson(true).isFollowedByQueryingPerson(true).build()
-                ).build(),
-                "2c",
-                new String[]{"2d", "2c"},
-                new String[]{"2b", "2c"}
-        );
-        getVerifyUserFollowingAndFollowers(
-                User.builder().id("2a").followingAmount(2).followersAmount(2).userMeta(
-                        UserMeta.builder().isFollowedByQueryingPerson(true).build()
-                ).build(),
-                "2d",
-                new String[]{"2d", "2c"},
-                new String[]{"2b", "2c"}
-        );
-        getVerifyUserFollowingAndFollowers(
-                User.builder().id("2a").followingAmount(2).followersAmount(2).userMeta(UserMeta.builder().build()).build(),
-                "2e",
-                new String[]{"2d", "2c"},
-                new String[]{"2b", "2c"}
-        );
-        //</editor-fold>
+        ));
         log.info("Verified 2a's connections");
         getVerifyUserFollowingAndFollowers(
                 User.builder().id("2b").followingAmount(0).followersAmount(1).build(),
