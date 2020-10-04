@@ -254,6 +254,56 @@ public class IntegrationTest {
         ));
     }
 
+    @Test
+    public void testBlacklist() {
+        saveUser("4a");
+        saveUser("4b");
+        follow("4a", "4b");
+        follow("4b", "4a");
+
+        queryingUser.setId("4b");
+        webClient.post()
+                .uri("/connections/blacklist/4a")
+                .exchange()
+                .expectStatus().isOk();
+        queryingUser.setId("4a");
+        webClient.post()
+                .uri("/connections/blacklist/4b")
+                .exchange()
+                .expectStatus().isOk();
+        webClient.delete()
+                .uri("/connections/blacklist/4b")
+                .exchange()
+                .expectStatus().isOk();
+        //post delete by 4b
+        getVerifyUserFollowingAndFollowers(
+                User.builder().id("4a").followersAmount(0).followingAmount(0).userMeta(UserMeta.builder().isBlacklistedByQueryingPerson(true).build()).build(),
+                "4b",
+                new String[0], new String[0]
+        );
+        getVerifyUserFollowingAndFollowers(
+                User.builder().id("4b").followersAmount(0).followingAmount(0).userMeta(UserMeta.builder().isQueryingPersonBlacklisted(true).build()).build(),
+                "4a",
+                new String[0], new String[0]
+        );
+        // verify get blacklist
+        queryingUser.setId("4a");
+        Flux<User> users = webClient.get()
+                .uri("/connections/blacklist")
+                .exchange().expectStatus().isOk()
+                .returnResult(User.class).getResponseBody();
+        StepVerifier.create(users)
+                .verifyComplete();
+        queryingUser.setId("4b");
+        users = webClient.get()
+                .uri("/connections/blacklist")
+                .exchange().expectStatus().isOk()
+                .returnResult(User.class).getResponseBody();
+        StepVerifier.create(users)
+                .expectNextMatches(e -> e.getId().equals("4a"))
+                .verifyComplete();
+    }
+
     private void getVerifyUserFollowingAndFollowers(
             User user, String queryingPerson, String[] followers, String[] following
     ) {
