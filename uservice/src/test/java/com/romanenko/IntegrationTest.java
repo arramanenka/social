@@ -225,6 +225,35 @@ public class IntegrationTest {
         log.info("Verified 2e's connections");
     }
 
+    @Test
+    public void testFollowDelete() {
+        saveUser("3a");
+        saveUser("3b");
+        follow("3a", "3b");
+        follow("3b", "3a");
+        queryingUser.setId("3a");
+        webClient.delete()
+                .uri("/connections/follower/3b")
+                .exchange().expectStatus().isOk();
+        var metaMap = new HashMap<String, UserMeta>();
+        metaMap.put("3a", null);
+        metaMap.put("3b", UserMeta.builder().isFollowedByQueryingPerson(true).build());
+        metaMap.forEach((key, value) -> getVerifyUserFollowingAndFollowers(
+                User.builder().id("3a").userMeta(value).followingAmount(0).followersAmount(1).build(),
+                key,
+                new String[]{"3b"},
+                new String[0]
+        ));
+        metaMap.put("3a", UserMeta.builder().isFollowingQueryingPerson(true).build());
+        metaMap.put("3b", null);
+        metaMap.forEach((key, value) -> getVerifyUserFollowingAndFollowers(
+                User.builder().id("3b").userMeta(value).followingAmount(1).followersAmount(0).build(),
+                key,
+                new String[0],
+                new String[]{"3a"}
+        ));
+    }
+
     private void getVerifyUserFollowingAndFollowers(
             User user, String queryingPerson, String[] followers, String[] following
     ) {
