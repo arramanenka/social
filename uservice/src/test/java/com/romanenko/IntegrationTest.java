@@ -154,55 +154,35 @@ public class IntegrationTest {
         follow("2d", "2a");
         log.info("Added follow connections");
         getVerifyUserFollowingAndFollowers(
-                User.builder()
-                        .id("2a")
-                        .followingAmount(2)
-                        .followersAmount(2)
-                        .build(),
+                User.builder().id("2a").followingAmount(2).followersAmount(2).build(),
                 "2a",
                 new String[]{"2d", "2c"},
                 new String[]{"2b", "2c"}
         );
         log.info("Verified 2a's connections");
         getVerifyUserFollowingAndFollowers(
-                User.builder()
-                        .id("2b")
-                        .followingAmount(0)
-                        .followersAmount(1)
-                        .build(),
+                User.builder().id("2b").followingAmount(0).followersAmount(1).build(),
                 "2b",
                 new String[]{"2a"},
                 new String[0]
         );
         log.info("Verified 2c's connections");
         getVerifyUserFollowingAndFollowers(
-                User.builder()
-                        .id("2c")
-                        .followingAmount(1)
-                        .followersAmount(1)
-                        .build(),
+                User.builder().id("2c").followingAmount(1).followersAmount(1).build(),
                 "2c",
                 new String[]{"2a"},
                 new String[]{"2a"}
         );
         log.info("Verified 2d's connections");
         getVerifyUserFollowingAndFollowers(
-                User.builder()
-                        .id("2d")
-                        .followingAmount(1)
-                        .followersAmount(0)
-                        .build(),
+                User.builder().id("2d").followingAmount(1).followersAmount(0).build(),
                 "2d",
                 new String[0],
                 new String[]{"2a"}
         );
         log.info("Verified 2e's connections");
         getVerifyUserFollowingAndFollowers(
-                User.builder()
-                        .id("2e")
-                        .followingAmount(0)
-                        .followersAmount(0)
-                        .build(),
+                User.builder().id("2e").followingAmount(0).followersAmount(0).build(),
                 "2e",
                 new String[0],
                 new String[0]
