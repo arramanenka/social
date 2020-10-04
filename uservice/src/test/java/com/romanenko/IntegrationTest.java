@@ -3,6 +3,8 @@ package com.romanenko;
 import com.romanenko.connection.UserConnectionCache;
 import com.romanenko.model.User;
 import com.romanenko.security.IdentityProvider;
+import lombok.extern.log4j.Log4j2;
+import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -27,9 +29,12 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 
+@Log4j2
 @SpringBootTest
 @AutoConfigureWebTestClient
 @EnableAutoConfiguration(exclude = ReactiveSecurityAutoConfiguration.class)
@@ -51,6 +56,8 @@ public class IntegrationTest {
     public void setUp() {
         queryingUser = User.builder().build();
         Mockito.when(identityProvider.getIdentity(any())).thenReturn(Mono.just(queryingUser::getId));
+        Mockito.when(connectionCache.clearConnection(anyString(), anyString())).thenReturn(Mono.empty());
+        Mockito.when(connectionCache.getCachedConnectionType(anyString(), anyString())).thenReturn(Mono.empty());
     }
 
     @Test
@@ -132,7 +139,118 @@ public class IntegrationTest {
 
     @Test
     public void testFollowingConnectionCountsAndRetrieval() {
+        saveUser("2a");
+        saveUser("2b");
+        saveUser("2c");
+        saveUser("2d");
+        saveUser("2e");
+        log.info("Saved 5 users");
+        // 2a -FOLLOW> 2b
+        follow("2a", "2b");
+        // 2a <-FOLLOW-> 2c
+        follow("2a", "2c");
+        follow("2c", "2a");
+        // 2a <-FOLLOW- 2d
+        follow("2d", "2a");
+        log.info("Added follow connections");
+        getVerifyUserFollowingAndFollowers(
+                User.builder()
+                        .id("2a")
+                        .followingAmount(2)
+                        .followersAmount(2)
+                        .build(),
+                "2a",
+                new String[]{"2d", "2c"},
+                new String[]{"2b", "2c"}
+        );
+        log.info("Verified 2a's connections");
+        getVerifyUserFollowingAndFollowers(
+                User.builder()
+                        .id("2b")
+                        .followingAmount(0)
+                        .followersAmount(1)
+                        .build(),
+                "2b",
+                new String[]{"2a"},
+                new String[0]
+        );
+        log.info("Verified 2c's connections");
+        getVerifyUserFollowingAndFollowers(
+                User.builder()
+                        .id("2c")
+                        .followingAmount(1)
+                        .followersAmount(1)
+                        .build(),
+                "2c",
+                new String[]{"2a"},
+                new String[]{"2a"}
+        );
+        log.info("Verified 2d's connections");
+        getVerifyUserFollowingAndFollowers(
+                User.builder()
+                        .id("2d")
+                        .followingAmount(1)
+                        .followersAmount(0)
+                        .build(),
+                "2d",
+                new String[0],
+                new String[]{"2a"}
+        );
+        log.info("Verified 2e's connections");
+        getVerifyUserFollowingAndFollowers(
+                User.builder()
+                        .id("2e")
+                        .followingAmount(0)
+                        .followersAmount(0)
+                        .build(),
+                "2e",
+                new String[0],
+                new String[0]
+        );
+    }
 
+    private void getVerifyUserFollowingAndFollowers(
+            User user, String queryingPerson, String[] followers, String[] following
+    ) {
+        queryingUser.setId(queryingPerson);
+
+        webClient.get()
+                .uri("/user/" + user.getId())
+                .exchange().expectStatus().isOk()
+                .expectBody()
+                .jsonPath("id").isEqualTo(user.getId())
+                .jsonPath("followingAmount").isEqualTo(user.getFollowingAmount())
+                .jsonPath("followersAmount").isEqualTo(user.getFollowersAmount());
+
+        verifyConnections(user, "/followers", followers);
+        verifyConnections(user, "/following", following);
+    }
+
+    private void verifyConnections(User user, String path, String[] expectedUsers) {
+        var expected = new ArrayList<>(List.of(expectedUsers));
+        Flux<User> users = webClient.get()
+                .uri("/connections/" + user.getId() + path)
+                .exchange().expectStatus().isOk()
+                .returnResult(User.class).getResponseBody();
+
+        StepVerifier.create(users)
+                .thenConsumeWhile(u -> expected.remove(u.getId()))
+                .verifyComplete();
+        Assert.assertTrue(expected.isEmpty());
+    }
+
+    private void follow(String followerId, String personId) {
+        queryingUser.setId(followerId);
+        webClient.post()
+                .uri("/connections/follower/" + personId)
+                .exchange()
+                .expectStatus().isOk();
+    }
+
+    private void saveUser(String id) {
+        queryingUser.setName(id);
+        queryingUser.setId(id);
+        saveUser(queryingUser);
     }
 
     private void saveUser(User user) {
