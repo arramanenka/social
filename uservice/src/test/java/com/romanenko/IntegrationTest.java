@@ -170,33 +170,59 @@ public class IntegrationTest {
                 new String[]{"2b", "2c"}
         ));
         log.info("Verified 2a's connections");
-        getVerifyUserFollowingAndFollowers(
-                User.builder().id("2b").followingAmount(0).followersAmount(1).build(),
-                "2b",
+        metaMap.clear();
+        metaMap.put("2a", UserMeta.builder().isFollowedByQueryingPerson(true).build());
+        metaMap.put("2b", null);
+        metaMap.put("2c", UserMeta.builder().build());
+        metaMap.put("2d", UserMeta.builder().build());
+        metaMap.put("2e", UserMeta.builder().build());
+
+        metaMap.forEach((key, value) -> getVerifyUserFollowingAndFollowers(
+                User.builder().id("2b").followingAmount(0).followersAmount(1).userMeta(value).build(),
+                key,
                 new String[]{"2a"},
                 new String[0]
-        );
+        ));
         log.info("Verified 2c's connections");
-        getVerifyUserFollowingAndFollowers(
-                User.builder().id("2c").followingAmount(1).followersAmount(1).build(),
-                "2c",
+        metaMap.clear();
+        metaMap.put("2a", UserMeta.builder().isFollowedByQueryingPerson(true).isFollowingQueryingPerson(true).build());
+        metaMap.put("2b", UserMeta.builder().build());
+        metaMap.put("2c", null);
+        metaMap.put("2d", UserMeta.builder().build());
+        metaMap.put("2e", UserMeta.builder().build());
+        metaMap.forEach((key, value) -> getVerifyUserFollowingAndFollowers(
+                User.builder().id("2c").followingAmount(1).followersAmount(1).userMeta(value).build(),
+                key,
                 new String[]{"2a"},
                 new String[]{"2a"}
-        );
-        log.info("Verified 2d's connections");
-        getVerifyUserFollowingAndFollowers(
-                User.builder().id("2d").followingAmount(1).followersAmount(0).build(),
-                "2d",
+        ));
+        log.info("Verified 2c's connections");
+        metaMap.clear();
+        metaMap.put("2a", UserMeta.builder().isFollowingQueryingPerson(true).build());
+        metaMap.put("2b", UserMeta.builder().build());
+        metaMap.put("2c", UserMeta.builder().build());
+        metaMap.put("2d", null);
+        metaMap.put("2e", UserMeta.builder().build());
+        metaMap.forEach((key, value) -> getVerifyUserFollowingAndFollowers(
+                User.builder().id("2d").followingAmount(1).followersAmount(0).userMeta(null).build(),
+                key,
                 new String[0],
                 new String[]{"2a"}
-        );
-        log.info("Verified 2e's connections");
-        getVerifyUserFollowingAndFollowers(
-                User.builder().id("2e").followingAmount(0).followersAmount(0).build(),
-                "2e",
+        ));
+        log.info("Verified 2d's connections");
+        metaMap.clear();
+        metaMap.put("2a", UserMeta.builder().build());
+        metaMap.put("2b", UserMeta.builder().build());
+        metaMap.put("2c", UserMeta.builder().build());
+        metaMap.put("2d", UserMeta.builder().build());
+        metaMap.put("2e", null);
+        metaMap.forEach((key, value) -> getVerifyUserFollowingAndFollowers(
+                User.builder().id("2e").followingAmount(0).followersAmount(0).userMeta(value).build(),
+                key,
                 new String[0],
                 new String[0]
-        );
+        ));
+        log.info("Verified 2e's connections");
     }
 
     private void getVerifyUserFollowingAndFollowers(
