@@ -31,6 +31,8 @@ import reactor.test.StepVerifier;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 
@@ -197,10 +199,23 @@ public class IntegrationTest {
         webClient.get()
                 .uri("/user/" + user.getId())
                 .exchange().expectStatus().isOk()
-                .expectBody()
-                .jsonPath("id").isEqualTo(user.getId())
-                .jsonPath("followingAmount").isEqualTo(user.getFollowingAmount())
-                .jsonPath("followersAmount").isEqualTo(user.getFollowersAmount());
+                .expectBody(User.class)
+                .consumeWith(r -> {
+                    User response = r.getResponseBody();
+                    assertNotNull(response);
+                    assertEquals(user.getId(), response.getId());
+                    assertEquals(user.getFollowersAmount(), response.getFollowersAmount());
+                    assertEquals(user.getFollowingAmount(), response.getFollowingAmount());
+                    var meta = user.getUserMeta();
+                    if (meta != null) {
+                        var responseMeta = response.getUserMeta();
+                        assertNotNull(responseMeta);
+                        assertEquals(meta.isBlacklistedByQueryingPerson(), responseMeta.isBlacklistedByQueryingPerson());
+                        assertEquals(meta.isQueryingPersonBlacklisted(), responseMeta.isQueryingPersonBlacklisted());
+                        assertEquals(meta.isFollowedByQueryingPerson(), responseMeta.isFollowedByQueryingPerson());
+                        assertEquals(meta.isFollowingQueryingPerson(), responseMeta.isFollowingQueryingPerson());
+                    }
+                });
 
         verifyConnections(user, "/followers", followers);
         verifyConnections(user, "/following", following);
