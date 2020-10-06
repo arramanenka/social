@@ -6,8 +6,10 @@ import com.romanenko.dao.MessageDao
 import com.romanenko.io.PageQuery
 import com.romanenko.model.Message
 import com.romanenko.security.Identity
+import com.romanenko.service.ChatService
 import com.romanenko.service.ConnectionService
 import org.junit.Test
+import org.mockito.Mockito
 import org.mockito.Mockito.*
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
@@ -18,7 +20,14 @@ import reactor.test.StepVerifier
 internal class DefaultMessageServiceTest {
     private val connectionServiceMock = mock(ConnectionService::class.java)
     private val messageDaoMock = mock(MessageDao::class.java)
-    private val messageService = DefaultMessageService(messageDaoMock, connectionServiceMock)
+    private val chatService = mock(ChatService::class.java)
+    private val messageService = DefaultMessageService(messageDaoMock, connectionServiceMock, chatService)
+
+    /**
+     * Returns Mockito.any() as nullable type to avoid java.lang.IllegalStateException when
+     * null is returned.
+     */
+    fun <T> any(): T = Mockito.any<T>()
 
     @Test
     fun `verify bad request when receiver not present`() {
@@ -77,6 +86,7 @@ internal class DefaultMessageServiceTest {
         val message = Message(senderId = "b", receiverId = "a", text = "message text")
         val messageMono = Mono.just(message)
 
+        `when`(chatService.addLastMessageInfo(any())).thenReturn(Mono.empty())
         `when`(messageDaoMock.sendMessage(message)).thenReturn(Mono.just(message))
         `when`(connectionServiceMock.getPermission("b", "a", PermissionKey.MESSAGE)).thenReturn(Mono.just(Permission.GRANTED))
 
@@ -93,8 +103,8 @@ internal class DefaultMessageServiceTest {
         val message = Message(senderId = "b", receiverId = "a", text = "message text")
         val messageMono = Mono.just(message)
 
-        `when`(messageDaoMock.sendMessage(message)).thenReturn(Mono.just(message))
-        `when`(connectionServiceMock.getPermission("b", "a", PermissionKey.MESSAGE)).thenReturn(Mono.just(Permission.DENIED))
+        `when`(messageDaoMock.sendMessage(any())).thenReturn(Mono.just(message))
+        `when`(connectionServiceMock.getPermission(any(), any(), any())).thenReturn(Mono.just(Permission.DENIED))
 
         StepVerifier.create(messageService.sendMessage(messageMono))
                 .verifyErrorMatches {
@@ -146,7 +156,7 @@ internal class DefaultMessageServiceTest {
     }
 
     @Test
-    fun `verify get messags results in bad request with improper users`() {
+    fun `verify get messages results in bad request with improper users`() {
         val pageQuery = PageQuery(0, 10)
         val identityMock = mock(Identity::class.java)
         `when`(identityMock.id).thenReturn("b")
@@ -165,6 +175,7 @@ internal class DefaultMessageServiceTest {
         val identityMock = mock(Identity::class.java)
         val pageQuery = PageQuery(0, 10)
 
+        `when`(chatService.clearUnread(anyString(), anyString())).thenReturn(Mono.empty())
         `when`(identityMock.id).thenReturn("a")
         `when`(messageDaoMock.getMessages("a", "b", pageQuery)).thenReturn(Flux.empty())
 

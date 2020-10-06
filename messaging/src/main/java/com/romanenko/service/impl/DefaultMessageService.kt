@@ -6,6 +6,7 @@ import com.romanenko.dao.MessageDao
 import com.romanenko.io.PageQuery
 import com.romanenko.model.Message
 import com.romanenko.security.Identity
+import com.romanenko.service.ChatService
 import com.romanenko.service.ConnectionService
 import com.romanenko.service.MessageService
 import org.springframework.http.HttpStatus
@@ -19,7 +20,7 @@ import reactor.core.scheduler.Schedulers
 class DefaultMessageService(
         private val messageDao: MessageDao,
         private val connectionService: ConnectionService,
-        private val chatService: DefaultChatService
+        private val chatService: ChatService
 ) : MessageService {
     override fun sendMessage(message: Mono<Message>): Mono<Message> {
         return message.flatMap {
@@ -32,7 +33,7 @@ class DefaultMessageService(
             connectionService.getPermission(it.senderId!!, it.receiverId!!, PermissionKey.MESSAGE)
                     .filter { permission -> Permission.GRANTED == permission }
                     .flatMap { _ -> messageDao.sendMessage(it) }
-                    .doOnSuccess { m -> chatService.addLastMessageInfo(m).subscribeOn(Schedulers.parallel()).subscribe() }
+                    .doOnNext { m -> chatService.addLastMessageInfo(m).subscribeOn(Schedulers.parallel()).subscribe() }
                     .switchIfEmpty(Mono.error(HttpClientErrorException(HttpStatus.FORBIDDEN)))
         }
     }
