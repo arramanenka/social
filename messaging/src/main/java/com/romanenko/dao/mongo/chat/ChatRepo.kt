@@ -18,11 +18,12 @@ data class MongoChat(
         var ownerId: String? = null,
         var interlocutorId: String? = null,
         var lastMessage: LocalDate? = null,
-        var unreadCount: Long? = null
+        var unreadCount: Long? = null,
+        var lastMessageText: String? = null
 ) {
 
     fun toModel(): PrivateChat {
-        return PrivateChat(ownerId, interlocutorId, lastMessage, unreadCount)
+        return PrivateChat(ownerId, interlocutorId, lastMessage, unreadCount, lastMessageText)
     }
 
 }
