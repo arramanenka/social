@@ -6,6 +6,7 @@ import com.romanenko.dao.MessageDao
 import com.romanenko.io.PageQuery
 import com.romanenko.model.Message
 import com.romanenko.security.Identity
+import com.romanenko.service.ChatService
 import com.romanenko.service.ConnectionService
 import com.romanenko.service.MessageService
 import org.springframework.http.HttpStatus
@@ -13,11 +14,13 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.core.scheduler.Schedulers
 
 @Component
 class DefaultMessageService(
         private val messageDao: MessageDao,
-        private val connectionService: ConnectionService
+        private val connectionService: ConnectionService,
+        private val chatService: ChatService
 ) : MessageService {
     override fun sendMessage(message: Mono<Message>): Mono<Message> {
         return message.flatMap {
@@ -30,16 +33,17 @@ class DefaultMessageService(
             connectionService.getPermission(it.senderId!!, it.receiverId!!, PermissionKey.MESSAGE)
                     .filter { permission -> Permission.GRANTED == permission }
                     .flatMap { _ -> messageDao.sendMessage(it) }
-                    .switchIfEmpty(Mono.error<Message>(HttpClientErrorException(HttpStatus.FORBIDDEN)))
+                    .doOnNext { m -> chatService.addLastMessageInfo(m).subscribeOn(Schedulers.parallel()).subscribe() }
+                    .switchIfEmpty(Mono.error(HttpClientErrorException(HttpStatus.FORBIDDEN)))
         }
     }
 
     override fun deleteMessage(message: Message): Mono<Message> {
         if (message.areUsersNotValid()) {
-            return Mono.error<Message>(HttpClientErrorException(HttpStatus.BAD_REQUEST, "Invalid users of direct chat"))
+            return Mono.error(HttpClientErrorException(HttpStatus.BAD_REQUEST, "Invalid users of direct chat"))
         }
         if (message.messageId.isNullOrEmpty()) {
-            return Mono.error<Message>(HttpClientErrorException(HttpStatus.NOT_FOUND))
+            return Mono.error(HttpClientErrorException(HttpStatus.NOT_FOUND))
         }
         return messageDao.deleteMessage(message)
     }
@@ -48,6 +52,10 @@ class DefaultMessageService(
         if (identity.id == userId || userId.isBlank()) {
             return Flux.error(HttpClientErrorException(HttpStatus.BAD_REQUEST, "Invalid user of direct chat"))
         }
-        return messageDao.getMessages(identity.id, userId, pageQuery)
+        val messages = messageDao.getMessages(identity.id, userId, pageQuery)
+        if (pageQuery.skipAmount == 0) {
+            return chatService.clearUnread(identity.id, userId).thenMany(messages)
+        }
+        return messages
     }
 }
