@@ -1,8 +1,8 @@
-package com.romanenko.service
+package com.romanenko.dao
 
 import com.romanenko.model.PrivateChat
 import reactor.core.publisher.Flux
 
-interface ChatService {
+interface ChatDao {
     fun getChats(ownerId: String): Flux<PrivateChat>
 }

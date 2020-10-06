@@ -3,8 +3,8 @@ package com.romanenko.model
 import java.time.LocalDate
 
 data class PrivateChat(
-        val ownerId: String,
-        val interlocutorId: String,
-        val lastMessage: LocalDate,
-        val unreadCount: Long
+        var ownerId: String?,
+        var interlocutorId: String?,
+        var lastMessage: LocalDate?,
+        var unreadCount: Long?
 )
