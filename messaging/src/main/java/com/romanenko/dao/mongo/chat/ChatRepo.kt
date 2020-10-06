@@ -1,6 +1,7 @@
 package com.romanenko.dao.mongo.chat
 
 import com.romanenko.model.PrivateChat
+import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository
@@ -8,7 +9,7 @@ import reactor.core.publisher.Flux
 import java.time.LocalDate
 
 interface ChatRepo : ReactiveMongoRepository<MongoChat, String> {
-    fun findAllByOwnerId(ownerId: String): Flux<MongoChat>
+    fun findAllByOwnerId(ownerId: String, sort: Sort): Flux<MongoChat>
 }
 
 @Document("chat")

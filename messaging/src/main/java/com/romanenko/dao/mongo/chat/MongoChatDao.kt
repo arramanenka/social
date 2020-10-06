@@ -2,6 +2,7 @@ package com.romanenko.dao.mongo.chat
 
 import com.romanenko.dao.ChatDao
 import com.romanenko.model.PrivateChat
+import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
@@ -16,7 +17,7 @@ class MongoChatDao(
         private val reactiveMongoTemplate: ReactiveMongoTemplate
 ) : ChatDao {
     override fun getChats(ownerId: String): Flux<PrivateChat> {
-        return chatRepo.findAllByOwnerId(ownerId)
+        return chatRepo.findAllByOwnerId(ownerId, Sort.by(Sort.Direction.DESC, "lastMessage"))
                 .map { it.toModel() }
     }
 
