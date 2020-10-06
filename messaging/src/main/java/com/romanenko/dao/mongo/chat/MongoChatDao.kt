@@ -46,8 +46,8 @@ class MongoChatDao(
 
     private fun queryChat(interlocutorId: String, ownerId: String): Query {
         return Query.query(Criteria
-                .where("interlocutorId").`is`(ownerId)
-                .and("ownerId").`is`(interlocutorId)
+                .where("interlocutorId").`is`(interlocutorId)
+                .and("ownerId").`is`(ownerId)
         )
     }
 }
