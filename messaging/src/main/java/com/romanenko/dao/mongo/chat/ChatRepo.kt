@@ -9,10 +9,12 @@ import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository
 import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 import java.util.*
 
 interface ChatRepo : ReactiveMongoRepository<MongoChat, String> {
     fun findAllByOwnerId(ownerId: String, sort: Sort): Flux<MongoChat>
+    fun findByOwnerIdAndInterlocutorId(ownerId: String, interlocutorId: String?): Mono<MongoChat>
 }
 
 @Document("chat")

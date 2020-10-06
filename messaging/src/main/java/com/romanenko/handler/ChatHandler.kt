@@ -21,6 +21,15 @@ class ChatHandler(
     override fun declareRoute(builder: ApiBuilder) {
         builder
                 .get("/chats", ::getChats)
+                .get("/chat/{interlocutorId}", ::getChat)
+    }
+
+    private fun getChat(request: ServerRequest): Mono<ServerResponse> {
+        val chat = identityProvider.getIdentity(request)
+                .flatMap {
+                    chatService.getChat(it.id, request.pathVariable("interlocutorId"))
+                }
+        return responseSupplier.ok(chat, PrivateChat::class.java)
     }
 
     private fun getChats(request: ServerRequest): Mono<ServerResponse> {

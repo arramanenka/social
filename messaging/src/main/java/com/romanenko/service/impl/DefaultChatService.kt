@@ -24,4 +24,8 @@ class DefaultChatService(
     override fun clearUnread(id: String, userId: String): Mono<Void> {
         return chatDao.clearUnread(id, userId)
     }
+
+    override fun getChat(id: String, interlocutorId: String): Mono<PrivateChat> {
+        return chatDao.getChat(id, interlocutorId)
+    }
 }

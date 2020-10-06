@@ -22,6 +22,11 @@ class MongoChatDao(
                 .map { it.toModel() }
     }
 
+    override fun getChat(id: String, interlocutorId: String): Mono<PrivateChat> {
+        return chatRepo.findByOwnerIdAndInterlocutorId(id, interlocutorId)
+                .map { it.toModel() }
+    }
+
     override fun addLastMessageInfo(message: Message): Mono<Void> {
         val receiverChatQuery = queryChat(message.senderId!!, message.receiverId!!)
         val receiverUpdate = Update.update("lastMessageTime", message.createdAt)
