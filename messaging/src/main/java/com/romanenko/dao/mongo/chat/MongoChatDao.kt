@@ -23,13 +23,25 @@ class MongoChatDao(
     }
 
     override fun addLastMessageInfo(message: Message): Mono<Void> {
-        val query = Query.query(Criteria
-                .where("interlocutorId").`is`(message.senderId)
-                .and("ownerId").`is`(message.receiverId)
-        )
-        val upd = Update.update("lastMessageTime", message.createdAt)
+        val receiverChatQuery = queryChat(message.senderId!!, message.receiverId!!)
+        val receiverUpdate = Update.update("lastMessageTime", message.createdAt)
                 .inc("unreadCount", 1)
                 .set("lastMessageText", message.text)
-        return reactiveMongoTemplate.upsert(query, upd, MongoChat::class.java).then()
+
+        val senderChatQuery = queryChat(message.receiverId!!, message.senderId!!)
+        val senderUpdate = Update.update("lastMessageTime", message.createdAt)
+                .set("unreadCount", 0)
+                .set("lastMessageText", message.text)
+
+        return reactiveMongoTemplate.upsert(receiverChatQuery, receiverUpdate, MongoChat::class.java).then(
+                reactiveMongoTemplate.upsert(senderChatQuery, senderUpdate, MongoChat::class.java).then()
+        )
+    }
+
+    private fun queryChat(interlocutorId: String, ownerId: String): Query {
+        return Query.query(Criteria
+                .where("interlocutorId").`is`(ownerId)
+                .and("ownerId").`is`(interlocutorId)
+        )
     }
 }
