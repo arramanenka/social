@@ -18,7 +18,7 @@ class MongoChatDao(
         private val reactiveMongoTemplate: ReactiveMongoTemplate
 ) : ChatDao {
     override fun getChats(ownerId: String): Flux<PrivateChat> {
-        return chatRepo.findAllByOwnerId(ownerId, Sort.by(Sort.Direction.DESC, "lastMessage"))
+        return chatRepo.findAllByOwnerId(ownerId, Sort.by(Sort.Direction.DESC, "unreadCount", "lastMessageTime"))
                 .map { it.toModel() }
     }
 
