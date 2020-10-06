@@ -3,10 +3,12 @@ package com.romanenko.dao.mongo.chat
 import com.romanenko.model.PrivateChat
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.index.CompoundIndex
+import org.springframework.data.mongodb.core.index.IndexDirection
+import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository
 import reactor.core.publisher.Flux
-import java.time.LocalDate
+import java.util.*
 
 interface ChatRepo : ReactiveMongoRepository<MongoChat, String> {
     fun findAllByOwnerId(ownerId: String, sort: Sort): Flux<MongoChat>
@@ -18,13 +20,14 @@ data class MongoChat(
         var id: String? = null,
         var ownerId: String? = null,
         var interlocutorId: String? = null,
-        var lastMessage: LocalDate? = null,
+        @Indexed(direction = IndexDirection.DESCENDING)
+        var lastMessageTime: Date? = null,
         var unreadCount: Long? = null,
         var lastMessageText: String? = null
 ) {
 
     fun toModel(): PrivateChat {
-        return PrivateChat(ownerId, interlocutorId, lastMessage, unreadCount, lastMessageText)
+        return PrivateChat(ownerId, interlocutorId, lastMessageTime, unreadCount, lastMessageText)
     }
 
 }

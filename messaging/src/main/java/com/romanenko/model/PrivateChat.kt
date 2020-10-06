@@ -1,11 +1,11 @@
 package com.romanenko.model
 
-import java.time.LocalDate
+import java.util.*
 
 data class PrivateChat(
         var ownerId: String?,
         var interlocutorId: String?,
-        var lastMessage: LocalDate?,
+        var lastMessage: Date?,
         var unreadCount: Long?,
         var lastMessageText: String?
 )

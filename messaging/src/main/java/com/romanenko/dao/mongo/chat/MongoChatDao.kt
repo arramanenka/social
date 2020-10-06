@@ -1,6 +1,7 @@
 package com.romanenko.dao.mongo.chat
 
 import com.romanenko.dao.ChatDao
+import com.romanenko.model.Message
 import com.romanenko.model.PrivateChat
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -21,14 +22,14 @@ class MongoChatDao(
                 .map { it.toModel() }
     }
 
-    override fun updateChatInfo(chat: PrivateChat): Mono<Void> {
+    override fun addLastMessageInfo(message: Message): Mono<Void> {
         val query = Query.query(Criteria
-                .where("interlocutorId").`is`(chat.interlocutorId)
-                .and("ownerId").`is`(chat.ownerId)
+                .where("interlocutorId").`is`(message.senderId)
+                .and("ownerId").`is`(message.receiverId)
         )
-        val upd = Update.update("lastMessage", chat.lastMessage)
-                .set("unreadCount", chat.unreadCount)
-                .set("lastMessageText", chat.lastMessageText)
+        val upd = Update.update("lastMessageTime", message.createdAt)
+                .inc("unreadCount", 1)
+                .set("lastMessageText", message.text)
         return reactiveMongoTemplate.upsert(query, upd, MongoChat::class.java).then()
     }
 }
