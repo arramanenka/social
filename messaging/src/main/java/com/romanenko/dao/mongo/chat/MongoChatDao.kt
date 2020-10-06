@@ -38,6 +38,12 @@ class MongoChatDao(
         )
     }
 
+    override fun clearUnread(id: String, userId: String): Mono<Void> {
+        val query = queryChat(userId, id)
+        val upd = Update.update("unreadCount", 0)
+        return reactiveMongoTemplate.updateFirst(query, upd, MongoChat::class.java).then()
+    }
+
     private fun queryChat(interlocutorId: String, ownerId: String): Query {
         return Query.query(Criteria
                 .where("interlocutorId").`is`(ownerId)

@@ -51,6 +51,10 @@ class DefaultMessageService(
         if (identity.id == userId || userId.isBlank()) {
             return Flux.error(HttpClientErrorException(HttpStatus.BAD_REQUEST, "Invalid user of direct chat"))
         }
-        return messageDao.getMessages(identity.id, userId, pageQuery)
+        val messages = messageDao.getMessages(identity.id, userId, pageQuery)
+        if (pageQuery.skipAmount == 0) {
+            return chatService.clearUnread(identity.id, userId).thenMany(messages)
+        }
+        return messages
     }
 }

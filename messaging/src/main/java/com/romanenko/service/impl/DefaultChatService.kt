@@ -20,4 +20,8 @@ class DefaultChatService(
     override fun addLastMessageInfo(message: Message): Mono<Void> {
         return chatDao.addLastMessageInfo(message)
     }
+
+    override fun clearUnread(id: String, userId: String): Mono<Void> {
+        return chatDao.clearUnread(id, userId)
+    }
 }

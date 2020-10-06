@@ -1,6 +1,7 @@
 package com.romanenko.dao.mongo.chat
 
 import com.romanenko.model.PrivateChat
+import org.springframework.data.annotation.Id
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.index.IndexDirection
@@ -17,6 +18,7 @@ interface ChatRepo : ReactiveMongoRepository<MongoChat, String> {
 @Document("chat")
 @CompoundIndex(name = "chat_index", def = "{'ownerId' : 1, 'interlocutorId' : 1}")
 data class MongoChat(
+        @Id
         var id: String? = null,
         var ownerId: String? = null,
         var interlocutorId: String? = null,
