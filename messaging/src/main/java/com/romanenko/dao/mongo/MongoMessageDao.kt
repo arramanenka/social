@@ -1,13 +1,13 @@
 package com.romanenko.dao.mongo
 
 import com.romanenko.dao.MessageDao
+import com.romanenko.dao.domain.OffsetLimitPageable
 import com.romanenko.io.PageQuery
 import com.romanenko.model.Message
 import org.bson.Document
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.event.ApplicationStartedEvent
 import org.springframework.context.ApplicationListener
-import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.index.CompoundIndexDefinition
@@ -33,7 +33,7 @@ class MongoMessageDao(
     }
 
     override fun getMessages(queryingPerson: String, userId: String, pageQuery: PageQuery): Flux<Message> {
-        val pageable = PageRequest.of(pageQuery.calculatePage(), pageQuery.amount, Sort.by(Sort.Direction.DESC, "createdAt"))
+        val pageable = OffsetLimitPageable(pageQuery.skipAmount, pageQuery.amount, Sort.by(Sort.Direction.DESC, "createdAt"))
         return messageRepo.findAllMessagesBetweenUsers(queryingPerson, userId, pageable)
                 .map { it.toModel() }
     }
