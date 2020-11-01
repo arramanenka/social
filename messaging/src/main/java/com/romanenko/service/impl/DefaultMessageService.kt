@@ -58,4 +58,12 @@ class DefaultMessageService(
         }
         return messages
     }
+
+    override fun getUnread(identity: Identity, userId: String, pageQuery: PageQuery): Flux<Message> {
+        return this.chatService.clearUnread(identity.id, userId, pageQuery.amount)
+                .flatMapMany {
+                    //Assumption: skipAmount should not be used in unread retrieval
+                    messageDao.getMessages(identity.id, userId, PageQuery(it.toInt(), pageQuery.amount), true)
+                }
+    }
 }

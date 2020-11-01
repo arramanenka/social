@@ -24,6 +24,7 @@ class MessageHandler(
                 .post("/message/{userId}", ::sendMessage)
                 .delete("/message/{userId}/{messageId}", ::deleteMessage)
                 .get("/messages/{userId}", ::getMessages)
+                .get("/messages/{userId}/unread", ::getUnread)
     }
 
     private fun sendMessage(request: ServerRequest): Mono<ServerResponse> {
@@ -51,6 +52,12 @@ class MessageHandler(
     private fun getMessages(request: ServerRequest): Mono<ServerResponse> {
         val messages = identityProvider.getIdentity(request)
                 .flatMapMany { messageService.getMessages(it, request.pathVariable("userId"), PageQuery(request)) }
+        return responseSupplier.ok(messages, Message::class.java)
+    }
+
+    private fun getUnread(request: ServerRequest): Mono<ServerResponse> {
+        val messages = identityProvider.getIdentity(request)
+                .flatMapMany { messageService.getUnread(it, request.pathVariable("userId"), PageQuery(request)) }
         return responseSupplier.ok(messages, Message::class.java)
     }
 }

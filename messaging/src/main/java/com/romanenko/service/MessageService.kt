@@ -10,4 +10,9 @@ interface MessageService {
     fun sendMessage(message: Mono<Message>): Mono<Message>
     fun deleteMessage(message: Message): Mono<Message>
     fun getMessages(identity: Identity, userId: String, pageQuery: PageQuery): Flux<Message>
+
+    /**
+     * @return unread messages with inverted sort (from latest to most recent)
+     */
+    fun getUnread(identity: Identity, userId: String, pageQuery: PageQuery): Flux<Message>
 }

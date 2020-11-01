@@ -26,7 +26,7 @@ class CassandraMessageDao(
     }
 
     //todo continuously check spring updates on pagination. Right now the only option is to skip manually
-    override fun getMessages(queryingPerson: String, userId: String, pageQuery: PageQuery): Flux<Message> {
+    override fun getMessages(queryingPerson: String, userId: String, pageQuery: PageQuery, invertedQuerying: Boolean): Flux<Message> {
         val pageable = CassandraPageRequest.first(pageQuery.fullRawQueryAmount())
         return messageRepo.findMessagesBetweenUsers(queryingPerson, userId, pageable)
                 .skip(pageQuery.calculateSkipAmount().toLong())

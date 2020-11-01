@@ -32,7 +32,7 @@ class MongoMessageDao(
         return messageRepo.deleteByMessageIdAndSenderIdAndReceiverId(message.messageId!!, message.senderId!!, message.receiverId!!).map { it.toModel() }
     }
 
-    override fun getMessages(queryingPerson: String, userId: String, pageQuery: PageQuery): Flux<Message> {
+    override fun getMessages(queryingPerson: String, userId: String, pageQuery: PageQuery, invertedQuerying: Boolean): Flux<Message> {
         val pageable = OffsetLimitPageable(pageQuery.skipAmount, pageQuery.amount, Sort.by(Sort.Direction.DESC, "createdAt"))
         return messageRepo.findAllMessagesBetweenUsers(queryingPerson, userId, pageable)
                 .map { it.toModel() }

@@ -8,5 +8,5 @@ import reactor.core.publisher.Mono
 interface MessageDao {
     fun sendMessage(message: Message): Mono<Message>
     fun deleteMessage(message: Message): Mono<Message>
-    fun getMessages(queryingPerson: String, userId: String, pageQuery: PageQuery): Flux<Message>
+    fun getMessages(queryingPerson: String, userId: String, pageQuery: PageQuery, invertedQuerying: Boolean = false): Flux<Message>
 }

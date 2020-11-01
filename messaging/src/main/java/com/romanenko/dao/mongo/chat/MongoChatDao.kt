@@ -5,6 +5,10 @@ import com.romanenko.model.Message
 import com.romanenko.model.PrivateChat
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
+import org.springframework.data.mongodb.core.aggregation.AggregationUpdate
+import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators
+import org.springframework.data.mongodb.core.aggregation.ComparisonOperators
+import org.springframework.data.mongodb.core.aggregation.ConditionalOperators
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
@@ -47,6 +51,21 @@ class MongoChatDao(
         val query = queryChat(userId, id)
         val upd = Update.update("unreadCount", 0)
         return reactiveMongoTemplate.updateFirst(query, upd, MongoChat::class.java).then()
+    }
+
+    override fun clearUnread(id: String, userId: String, amount: Int): Mono<Long> {
+        val query = queryChat(userId, id)
+        val upd = AggregationUpdate.update().set("unreadCount")
+                .toValue(ConditionalOperators.switchCases(
+                        ConditionalOperators.Switch.CaseOperator.`when`(ComparisonOperators.Gte.valueOf("unreadCount")
+                                .greaterThanEqualToValue(amount))
+                                .then(ArithmeticOperators.valueOf("unreadCount").subtract(amount)),
+                        ConditionalOperators.Switch.CaseOperator.`when`(ComparisonOperators.Lte.valueOf("unreadCount")
+                                .lessThanEqualToValue(amount))
+                                .then(0)
+                ))
+        return reactiveMongoTemplate.findAndModify(query, upd, MongoChat::class.java)
+                .map { it.unreadCount ?: 0 }
     }
 
     private fun queryChat(interlocutorId: String, ownerId: String): Query {
