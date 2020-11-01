@@ -62,8 +62,16 @@ class DefaultMessageService(
     override fun getUnread(identity: Identity, userId: String, pageQuery: PageQuery): Flux<Message> {
         return this.chatService.clearUnread(identity.id, userId, pageQuery.amount)
                 .flatMapMany {
-                    //Assumption: skipAmount should not be used in unread retrieval
-                    messageDao.getMessages(identity.id, userId, PageQuery(it.toInt(), pageQuery.amount), true)
+                    if (it > 0) {
+                        var amount = pageQuery.amount
+                        if (it < pageQuery.amount) {
+                            amount = it.toInt()
+                        }
+                        val skipAmount = it.toInt() - amount
+                        //Assumption: skipAmount should not be used in unread retrieval
+                        return@flatMapMany messageDao.getMessages(identity.id, userId, PageQuery(skipAmount, amount), true)
+                    }
+                    return@flatMapMany Flux.empty<Message>()
                 }
     }
 }

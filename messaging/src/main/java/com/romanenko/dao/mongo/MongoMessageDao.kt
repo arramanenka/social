@@ -8,9 +8,13 @@ import org.bson.Document
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.event.ApplicationStartedEvent
 import org.springframework.context.ApplicationListener
+import org.springframework.data.domain.Example
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
+import org.springframework.data.mongodb.core.aggregation.Aggregation.*
+import org.springframework.data.mongodb.core.aggregation.TypedAggregation
 import org.springframework.data.mongodb.core.index.CompoundIndexDefinition
+import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -33,6 +37,22 @@ class MongoMessageDao(
     }
 
     override fun getMessages(queryingPerson: String, userId: String, pageQuery: PageQuery, invertedQuerying: Boolean): Flux<Message> {
+        if (invertedQuerying) {
+            val aggregation = TypedAggregation.newAggregation(MongoMessage::class.java,
+                    match(Criteria.byExample(
+                            Example.of(MongoMessage(senderId = queryingPerson, receiverId = userId))
+                    ).orOperator(
+                            Criteria.byExample(
+                                    Example.of(MongoMessage(senderId = userId, receiverId = queryingPerson))
+                            )
+                    )),
+                    sort(Sort.Direction.DESC, "createdAt"),
+                    skip(pageQuery.skipAmount.toLong()),
+                    limit(pageQuery.amount.toLong()),
+                    sort(Sort.Direction.ASC, "createdAt")
+            )
+            return mongoTemplate.aggregate(aggregation, MongoMessage::class.java).map { it.toModel() }
+        }
         val pageable = OffsetLimitPageable(pageQuery.skipAmount, pageQuery.amount, Sort.by(Sort.Direction.DESC, "createdAt"))
         return messageRepo.findAllMessagesBetweenUsers(queryingPerson, userId, pageable)
                 .map { it.toModel() }
