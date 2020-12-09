@@ -2,11 +2,11 @@ package com.romanenko.service.impl
 
 import com.romanenko.connection.Permission
 import com.romanenko.connection.PermissionKey
+import com.romanenko.dao.ChatDao
 import com.romanenko.dao.MessageDao
 import com.romanenko.io.PageQuery
 import com.romanenko.model.Message
 import com.romanenko.security.Identity
-import com.romanenko.service.ChatService
 import com.romanenko.service.ConnectionService
 import org.junit.Test
 import org.mockito.Mockito
@@ -20,8 +20,8 @@ import reactor.test.StepVerifier
 internal class DefaultMessageServiceTest {
     private val connectionServiceMock = mock(ConnectionService::class.java)
     private val messageDaoMock = mock(MessageDao::class.java)
-    private val chatService = mock(ChatService::class.java)
-    private val messageService = DefaultMessageService(messageDaoMock, connectionServiceMock, chatService)
+    private val chatDao = mock(ChatDao::class.java)
+    private val messageService = DefaultMessageService(messageDaoMock, connectionServiceMock, chatDao)
 
     /**
      * Returns Mockito.any() as nullable type to avoid java.lang.IllegalStateException when
@@ -86,7 +86,7 @@ internal class DefaultMessageServiceTest {
         val message = Message(senderId = "b", receiverId = "a", text = "message text")
         val messageMono = Mono.just(message)
 
-        `when`(chatService.addLastMessageInfo(any())).thenReturn(Mono.empty())
+        `when`(chatDao.addLastMessageInfo(any())).thenReturn(Mono.empty())
         `when`(messageDaoMock.sendMessage(message)).thenReturn(Mono.just(message))
         `when`(connectionServiceMock.getPermission("b", "a", PermissionKey.MESSAGE)).thenReturn(Mono.just(Permission.GRANTED))
 
@@ -175,7 +175,7 @@ internal class DefaultMessageServiceTest {
         val identityMock = mock(Identity::class.java)
         val pageQuery = PageQuery(0, 10)
 
-        `when`(chatService.clearUnread(anyString(), anyString())).thenReturn(Mono.empty())
+        `when`(chatDao.clearUnread(anyString(), anyString())).thenReturn(Mono.empty())
         `when`(identityMock.id).thenReturn("a")
         `when`(messageDaoMock.getMessages("a", "b", pageQuery)).thenReturn(Flux.empty())
 

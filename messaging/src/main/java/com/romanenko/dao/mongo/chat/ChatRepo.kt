@@ -1,10 +1,10 @@
 package com.romanenko.dao.mongo.chat
 
+import com.romanenko.model.ChatsMetaInf
 import com.romanenko.model.PrivateChat
 import org.springframework.data.annotation.Id
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.index.CompoundIndex
-import org.springframework.data.mongodb.core.index.IndexDirection
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository
@@ -34,4 +34,12 @@ data class MongoChat(
         return PrivateChat(ownerId, interlocutorId, lastMessageTime, unreadCount, lastMessageText)
     }
 
+}
+
+data class MongoChatsMetaInf(
+        var chatCount: Int?,
+        var unreadAmount: Int?
+) {
+
+    fun toModel(): ChatsMetaInf = ChatsMetaInf(chatCount ?: 0, unreadAmount ?: 0)
 }

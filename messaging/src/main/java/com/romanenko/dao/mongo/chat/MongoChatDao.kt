@@ -1,10 +1,12 @@
 package com.romanenko.dao.mongo.chat
 
 import com.romanenko.dao.ChatDao
+import com.romanenko.model.ChatsMetaInf
 import com.romanenko.model.Message
 import com.romanenko.model.PrivateChat
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
+import org.springframework.data.mongodb.core.aggregation.Aggregation.*
 import org.springframework.data.mongodb.core.aggregation.AggregationUpdate
 import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators
 import org.springframework.data.mongodb.core.aggregation.ComparisonOperators
@@ -66,6 +68,19 @@ class MongoChatDao(
                 ))
         return reactiveMongoTemplate.findAndModify(query, upd, MongoChat::class.java)
                 .map { it.unreadCount ?: 0 }
+    }
+
+    override fun getMetaInf(id: String): Mono<ChatsMetaInf> {
+        val aggr = newAggregation(
+                match(Criteria.where("ownerId").`is`(id)),
+                group().count().`as`("chatCount")
+                        .sum("unreadCount").`as`("unreadAmount")
+
+        )
+
+        return reactiveMongoTemplate.aggregate(aggr, "chat", MongoChatsMetaInf::class.java)
+                .map { it.toModel() }
+                .next()
     }
 
     private fun queryChat(interlocutorId: String, ownerId: String): Query {

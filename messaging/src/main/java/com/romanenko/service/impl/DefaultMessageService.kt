@@ -2,11 +2,11 @@ package com.romanenko.service.impl
 
 import com.romanenko.connection.Permission
 import com.romanenko.connection.PermissionKey
+import com.romanenko.dao.ChatDao
 import com.romanenko.dao.MessageDao
 import com.romanenko.io.PageQuery
 import com.romanenko.model.Message
 import com.romanenko.security.Identity
-import com.romanenko.service.ChatService
 import com.romanenko.service.ConnectionService
 import com.romanenko.service.MessageService
 import org.springframework.http.HttpStatus
@@ -20,7 +20,7 @@ import reactor.core.scheduler.Schedulers
 class DefaultMessageService(
         private val messageDao: MessageDao,
         private val connectionService: ConnectionService,
-        private val chatService: ChatService
+        private val chatDao: ChatDao
 ) : MessageService {
     override fun sendMessage(message: Mono<Message>): Mono<Message> {
         return message.flatMap {
@@ -33,7 +33,7 @@ class DefaultMessageService(
             connectionService.getPermission(it.senderId!!, it.receiverId!!, PermissionKey.MESSAGE)
                     .filter { permission -> Permission.GRANTED == permission }
                     .flatMap { _ -> messageDao.sendMessage(it) }
-                    .doOnNext { m -> chatService.addLastMessageInfo(m).subscribeOn(Schedulers.parallel()).subscribe() }
+                    .doOnNext { m -> chatDao.addLastMessageInfo(m).subscribeOn(Schedulers.parallel()).subscribe() }
                     .switchIfEmpty(Mono.error(HttpClientErrorException(HttpStatus.FORBIDDEN)))
         }
     }
@@ -54,13 +54,13 @@ class DefaultMessageService(
         }
         val messages = messageDao.getMessages(identity.id, userId, pageQuery)
         if (pageQuery.skipAmount == 0) {
-            return chatService.clearUnread(identity.id, userId).thenMany(messages)
+            return chatDao.clearUnread(identity.id, userId).thenMany(messages)
         }
         return messages
     }
 
     override fun getUnread(identity: Identity, userId: String, pageQuery: PageQuery): Flux<Message> {
-        return this.chatService.clearUnread(identity.id, userId, pageQuery.amount)
+        return this.chatDao.clearUnread(identity.id, userId, pageQuery.amount)
                 .flatMapMany {
                     if (it > 0) {
                         var amount = pageQuery.amount
