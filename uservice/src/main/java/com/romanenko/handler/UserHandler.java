@@ -4,6 +4,7 @@ import com.romanenko.dao.UserDao;
 import com.romanenko.io.PageQuery;
 import com.romanenko.io.ResponseSupplier;
 import com.romanenko.model.User;
+import com.romanenko.model.UserRecommendation;
 import com.romanenko.routing.ApiBuilder;
 import com.romanenko.routing.Routable;
 import com.romanenko.security.IdentityProvider;
@@ -28,9 +29,17 @@ public class UserHandler implements Routable {
     @Override
     public void declareRoute(ApiBuilder builder) {
         builder.get("/users/nickname/{nickStart}", this::getAll)
+                .get("/users/recommendations", this::getRecommendations)
                 .post("/user", this::saveUser)
                 .get("/user/{id}", this::getUser)
                 .delete("/user", this::deleteUser);
+    }
+
+    @NonNull
+    private Mono<ServerResponse> getRecommendations(ServerRequest request) {
+        Flux<UserRecommendation> users = identityProvider.getIdentity(request)
+                .flatMapMany(identity -> userDao.getRecommendations(identity, new PageQuery(request)));
+        return responseSupplier.ok(users, UserRecommendation.class);
     }
 
     @NonNull

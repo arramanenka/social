@@ -2,6 +2,7 @@ package com.romanenko.dao.impl.neo.model;
 
 import com.romanenko.model.User;
 import com.romanenko.model.UserMeta;
+import com.romanenko.model.UserRecommendation;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -33,6 +34,8 @@ public class NeoUser {
     public static final String META_BLACKLISTED_QUERYING_LABEL = "blocked_q";
     public static final String META_FOLLOWED_BY_QUERYING_LABEL = "q_follows";
     public static final String META_FOLLOWS_QUERYING_LABEL = "follows_q";
+
+    public static final String CONNECTION_DEPTH = "depth";
 
     @Property(name = NAME_LABEL)
     private String name;
@@ -78,6 +81,13 @@ public class NeoUser {
         }
         updateMeta(mapValue, builder);
         return builder.build();
+    }
+
+    public static UserRecommendation convertUserRecommendation(MapValue mapValue) {
+        return UserRecommendation.builder()
+                .user(convertSimpleProfile(mapValue))
+                .depthOfConnection(mapValue.get(CONNECTION_DEPTH, 2))
+                .build();
     }
 
     private static void updateMeta(MapValue mapValue, User.UserBuilder builder) {

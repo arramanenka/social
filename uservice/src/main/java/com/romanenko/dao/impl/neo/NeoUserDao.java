@@ -4,6 +4,7 @@ import com.romanenko.dao.UserDao;
 import com.romanenko.dao.impl.neo.model.NeoUser;
 import com.romanenko.io.PageQuery;
 import com.romanenko.model.User;
+import com.romanenko.model.UserRecommendation;
 import com.romanenko.security.Identity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -33,6 +34,12 @@ public class NeoUserDao implements UserDao {
     public Flux<User> getAllByNickBeginning(Identity queryingIdentity, String nickStart, PageQuery pageQuery) {
         return userRepo.findAllByNick(queryingIdentity.getId(), nickStart, pageQuery.calculateSkipAmount(), pageQuery.amount)
                 .map(NeoUser::convertSimpleProfile);
+    }
+
+    @Override
+    public Flux<UserRecommendation> getRecommendations(Identity identity, PageQuery pageQuery) {
+        return userRepo.findRecommendations(identity.getId(), pageQuery.skipAmount, pageQuery.amount)
+                .map(NeoUser::convertUserRecommendation);
     }
 
     @Override

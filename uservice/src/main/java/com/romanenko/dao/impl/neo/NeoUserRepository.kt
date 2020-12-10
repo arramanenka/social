@@ -64,4 +64,21 @@ skip $2
 limit $3
 """)
     fun findAllByNick(id: String, nickStart: String, skipAmount: Int, amount: Int): Flux<MapValue>
+
+    @Query("""
+match (queryingPerson: $PRIMARY_LABEL {puId: $0}) with queryingPerson
+match (queryingPerson)-[:FOLLOW*2..3]->(person:app_user)
+where person.puId <> queryingPerson.puId and
+not (person)<-[:$FOLLOW_NAME]-(queryingPerson)
+and not (person)-[:$BLACKLIST_NAME]-(queryingPerson)
+with distinct person, queryingPerson
+skip $1
+limit $2
+with {
+neoUser: person,
+connectionDepth: LENGTH(shortestPath((person)<-[:$FOLLOW_NAME*..3]-(queryingPerson)))
+} as personAcc
+return personAcc
+""")
+    fun findRecommendations(id: String, skipAmount: Int, amount: Int): Flux<MapValue>
 }
