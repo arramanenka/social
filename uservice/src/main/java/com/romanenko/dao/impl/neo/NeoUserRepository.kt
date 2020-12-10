@@ -67,7 +67,7 @@ limit $3
 
     @Query("""
 match (queryingPerson: $PRIMARY_LABEL {puId: $0}) with queryingPerson
-match (queryingPerson)-[:FOLLOW*2..3]->(person:app_user)
+match (queryingPerson)-[:FOLLOW*2..3]->(person:$PRIMARY_LABEL)
 where person.puId <> queryingPerson.puId and
 not (person)<-[:$FOLLOW_NAME]-(queryingPerson)
 and not (person)-[:$BLACKLIST_NAME]-(queryingPerson)
@@ -75,8 +75,8 @@ with distinct person, queryingPerson
 skip $1
 limit $2
 with {
-neoUser: person,
-connectionDepth: LENGTH(shortestPath((person)<-[:$FOLLOW_NAME*..3]-(queryingPerson)))
+$AS_NESTED_LABEL: person,
+$CONNECTION_DEPTH: LENGTH(shortestPath((person)<-[:$FOLLOW_NAME*..3]-(queryingPerson)))
 } as personAcc
 return personAcc
 """)
