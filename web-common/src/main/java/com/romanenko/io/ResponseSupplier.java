@@ -1,12 +1,15 @@
 package com.romanenko.io;
 
 import org.jetbrains.annotations.NotNull;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface ResponseSupplier {
     Mono<ServerResponse> ok();
+
+    Mono<ServerResponse> ok(FileSystemResource fileSystemResource);
 
     Mono<ServerResponse> ok(Object object);
 

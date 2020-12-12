@@ -2,6 +2,7 @@ package com.romanenko.io;
 
 import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,11 @@ public class DefaultResponseSupplier implements ResponseSupplier {
     @Override
     public Mono<ServerResponse> ok() {
         return ServerResponse.ok().build();
+    }
+
+    @Override
+    public Mono<ServerResponse> ok(FileSystemResource fileSystemResource) {
+        return ServerResponse.ok().bodyValue(fileSystemResource);
     }
 
     @Override
