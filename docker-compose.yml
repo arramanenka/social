@@ -41,6 +41,13 @@ services:
     ports:
       - 8080:8080
     restart: unless-stopped
+  storage:
+    image: arramanenka/storage:latest
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+    ports:
+      - 8082:8082
+    restart: always
   message_service:
     image: arramanenka/messaging:latest
     depends_on:

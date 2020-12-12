@@ -26,6 +26,7 @@
         <module>common</module>
         <module>cache</module>
         <module>messaging</module>
+        <module>storage</module>
     </modules>
 
     <dependencies>
